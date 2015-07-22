@@ -17,7 +17,7 @@
  * 
  * This Junit test runs query with preparedstatement after changing parameters
  * 
- * @author Horváth Attila
+ * @author Horvï¿½th Attila
  */
 
 package BQJDBC.QueryResultTest;
@@ -44,7 +44,7 @@ import org.junit.Test;
  * This Junit test runs query with preparedstatement, while changing the number
  * of results
  * 
- * @author Horváth Attila
+ * @author Horvï¿½th Attila
  * @author Balazs Gunics
  * 
  */
@@ -84,9 +84,9 @@ public class PreparedStatementTests {
                     .getConnection(
                             BQSupportFuncts
                                     .constructUrlFromPropertiesFile(BQSupportFuncts
-                                            .readFromPropFile("installedaccount1.properties")),
+                                            .readFromPropFile("installedaccount.properties")),
                             BQSupportFuncts
-                                    .readFromPropFile("installedaccount1.properties"));
+                                    .readFromPropFile("installedaccount.properties"));
         }
         catch (Exception e) {
             e.printStackTrace();

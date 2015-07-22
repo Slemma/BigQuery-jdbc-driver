@@ -35,7 +35,7 @@ import org.junit.Test;
 /**
  * This Junit test tests functions in BQResultset
  * 
- * @author Horváth Attila
+ * @author Horvï¿½th Attila
  * @author Gunics Balazs
  */
 public class BQScrollableResultSetFunctionTest {
@@ -279,8 +279,8 @@ public class BQScrollableResultSetFunctionTest {
                     Class.forName("net.starschema.clouddb.jdbc.BQDriver");
                     BQScrollableResultSetFunctionTest.con = DriverManager.getConnection(
                             BQSupportFuncts.constructUrlFromPropertiesFile(BQSupportFuncts
-                                    .readFromPropFile("installedaccount1.properties")),
-                            BQSupportFuncts.readFromPropFile("installedaccount1.properties"));
+                                    .readFromPropFile("installedaccount.properties")),
+                            BQSupportFuncts.readFromPropFile("installedaccount.properties"));
                 }
                 catch (Exception e) {
                     e.printStackTrace();
