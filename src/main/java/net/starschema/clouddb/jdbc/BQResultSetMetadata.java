@@ -36,7 +36,7 @@ import com.google.api.services.bigquery.model.TableSchema;
 /**
  * This class implements the java.sql.ResultSetMetadata interface
  * 
- * @author Horváth Attila
+ * @author Horvï¿½th Attila
  * 
  */
 class BQResultsetMetaData implements ResultSetMetaData {
@@ -294,8 +294,7 @@ class BQResultsetMetaData implements ResultSetMetaData {
         if (this.getColumnType(column) == java.sql.Types.FLOAT) {
             int max = 0;
             for (int i = 0; i < this.result.getRows().size(); i++) {
-                String rowdata = this.result.getRows().get(i).getF()
-                        .get(column - 1).getV();
+                String rowdata = (String) this.result.getRows().get(i).getF().get(column - 1).getV();
                 if (rowdata.contains(".")) {
                     int pointback = rowdata.length() - rowdata.indexOf(".");
                     if (pointback > max) {

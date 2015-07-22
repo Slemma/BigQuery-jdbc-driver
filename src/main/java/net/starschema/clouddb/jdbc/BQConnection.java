@@ -56,7 +56,7 @@ import com.google.api.services.bigquery.Bigquery;
  * The connection class which builds the connection between BigQuery and the
  * Driver
  * 
- * @author Gunics Balázs, Horváth Attila
+ * @author Gunics Balï¿½zs, Horvï¿½th Attila
  * 
  */
 public class BQConnection implements Connection {
@@ -94,7 +94,7 @@ public class BQConnection implements Connection {
     /**
      * Extracts the JDBC URL then makes a connection to the Bigquery.
      * 
-     * @param serverdata
+     * @param url
      *            the JDBC connection URL
      * @param loginProp
      * 

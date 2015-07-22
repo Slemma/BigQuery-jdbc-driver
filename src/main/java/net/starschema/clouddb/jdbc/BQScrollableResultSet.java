@@ -25,13 +25,14 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import com.google.api.services.bigquery.model.GetQueryResultsResponse;
+import com.google.api.services.bigquery.model.TableCell;
 import com.google.api.services.bigquery.model.TableRow;
 
 /**
  * This class implements the java.sql.ResultSet interface its superclass is
  * ScrollableResultset
  * 
- * @author Attila Horváth
+ * @author Attila Horvï¿½th
  */
 public class BQScrollableResultSet extends ScrollableResultset<Object> implements
         java.sql.ResultSet {
@@ -161,8 +162,8 @@ public class BQScrollableResultSet extends ScrollableResultset<Object> implement
         }
         String Columntype = this.Result.getSchema().getFields()
                 .get(columnIndex - 1).getType();
-        String result = ((TableRow) this.RowsofResult[this.Cursor]).getF()
-                .get(columnIndex - 1).getV();
+        TableCell field = ((TableRow) this.RowsofResult[this.Cursor]).getF().get(columnIndex - 1);
+        String result = field.getV().toString();
         if (result == null) {
             this.wasnull = true;
             return null;
@@ -192,7 +193,7 @@ public class BQScrollableResultSet extends ScrollableResultset<Object> implement
                     return Boolean.parseBoolean(result);
                 }
                 if (Columntype.equals("INTEGER")) {
-                    return Integer.parseInt(result);
+                    return Long.parseLong(result);
                 }
                 throw new BQSQLException("Unsupported Type");
             }
@@ -218,7 +219,7 @@ public class BQScrollableResultSet extends ScrollableResultset<Object> implement
         if (this.isClosed()) {
             throw new BQSQLException("This Resultset is Closed");
         }
-        String result = ((TableRow) this.RowsofResult[this.Cursor]).getF()
+        String result = (String) ((TableRow) this.RowsofResult[this.Cursor]).getF()
                 .get(columnIndex - 1).getV();
         if (result == null) {
             this.wasnull = true;

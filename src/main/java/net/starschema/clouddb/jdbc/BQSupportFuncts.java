@@ -31,27 +31,21 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
+import com.google.api.services.bigquery.model.*;
 import org.apache.log4j.Logger;
 
 import com.google.api.services.bigquery.Bigquery;
 import com.google.api.services.bigquery.Bigquery.Jobs.Insert;
 import com.google.api.services.bigquery.model.DatasetList.Datasets;
-import com.google.api.services.bigquery.model.GetQueryResultsResponse;
-import com.google.api.services.bigquery.model.Job;
-import com.google.api.services.bigquery.model.JobConfiguration;
-import com.google.api.services.bigquery.model.JobConfigurationQuery;
 import com.google.api.services.bigquery.model.ProjectList.Projects;
-import com.google.api.services.bigquery.model.ProjectReference;
-import com.google.api.services.bigquery.model.Table;
 import com.google.api.services.bigquery.model.TableList.Tables;
-import com.google.api.services.bigquery.model.TableRow;
 
 // import net.starschema.clouddb.bqjdbc.logging.Logger;
 
 /**
  * This class contains static methods for interacting with BigQuery
  * 
- * @author Gunics Balázs, Horváth Attila
+ * @author Gunics Balï¿½zs, Horvï¿½th Attila
  * 
  */
 public class BQSupportFuncts {
@@ -64,9 +58,6 @@ public class BQSupportFuncts {
      * File
      * 
      * @param properties
-     *            Properties File most commonly read by
-     *            ReadUrlFromPropFile(String)
-     * @see #ReadUrlFromPropFile(String)
      * @return a valid BigQuery JDBC driver URL or null if it fails to load
      * @throws UnsupportedEncodingException
      */
@@ -138,7 +129,7 @@ public class BQSupportFuncts {
         List<TableRow> rows = queryResult.getRows();
         System.out.print("\nQuery Results:\n------------\n");
         for (TableRow row : rows) {
-            for (TableRow.F field : row.getF()) {
+            for (TableCell field : row.getF()) {
                 System.out.printf("%-20s", field.getV());
             }
             System.out.println();
@@ -410,7 +401,7 @@ public class BQSupportFuncts {
      * Returns a list of Tables which's id matches TablenamePattern and are
      * exactly in the given Project and Dataset
      * 
-     * @param tablename
+     * @param tableNamePattern
      *            String that the tableid must contain
      * @param projectId
      *            The exact Id of the Project that the tables must be in
