@@ -130,7 +130,7 @@ public class PreparedStatementTests {
      */
     @Test
     public void ParameterlessTest() {
-        final String sql = "SELECT TOP(word, 3), COUNT(*) FROM publicdata:samples.shakespeare";
+        final String sql = "SELECT TOP(word, 3) as f1, COUNT(*) as f2 FROM publicdata:samples.shakespeare";
         System.out.println("Test number: 00");
         System.out.println("Running query:" + sql);
         try {

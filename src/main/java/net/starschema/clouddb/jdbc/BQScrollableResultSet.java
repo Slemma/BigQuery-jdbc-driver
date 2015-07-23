@@ -1,20 +1,20 @@
 /**
  * Starschema Big Query JDBC Driver
  * Copyright (C) 2012, Starschema Ltd.
- * 
+ * <p/>
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 2 of the License, or
  * any later version.
- * 
+ * <p/>
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ * <p/>
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
- * 
+ * <p/>
  * This class implements the java.sql.Resultset interface
  */
 package net.starschema.clouddb.jdbc;
@@ -23,25 +23,28 @@ import java.math.BigInteger;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
+import java.math.BigDecimal;
 
 import com.google.api.services.bigquery.model.GetQueryResultsResponse;
-import com.google.api.services.bigquery.model.TableCell;
 import com.google.api.services.bigquery.model.TableRow;
+import com.google.api.services.bigquery.model.TableCell;
+import com.google.api.client.util.Data;
 
 /**
  * This class implements the java.sql.ResultSet interface its superclass is
  * ScrollableResultset
- * 
+ *
  * @author Attila Horv�th
  */
 public class BQScrollableResultSet extends ScrollableResultset<Object> implements
         java.sql.ResultSet {
-    
+
     /**
      * to set the maxFieldSize
      */
     private int maxFieldSize = 0;
-    
+
     /**
      * This Reference is for storing the GetQueryResultsResponse got from
      * bigquery
@@ -52,74 +55,68 @@ public class BQScrollableResultSet extends ScrollableResultset<Object> implement
      * created this Resultset
      */
     private BQStatement Statementreference = null;
-    
+
     public BQScrollableResultSet(GetQueryResultsResponse bigQueryGetQueryResultResponse,
-            BQPreparedStatement bqPreparedStatement) {
+                                 BQPreparedStatement bqPreparedStatement) {
         logger.debug("Created Scrollable resultset TYPE_SCROLL_INSENSITIVE");
         this.Result = bigQueryGetQueryResultResponse;
         BigInteger maxrow;
         try {
             maxrow = BigInteger.valueOf(bqPreparedStatement.getMaxRows());
             this.Result.setTotalRows(maxrow);
+        } catch (SQLException e) {
+            // Should not happen.
         }
-        catch (SQLException e) {
-         // Should not happen.
-        }
-        
-        try {            
+
+        try {
             maxFieldSize = bqPreparedStatement.getMaxFieldSize();
+        } catch (SQLException e) {
+            // Should not happen.
         }
-        catch (SQLException e) {
-         // Should not happen.
-        }
-        
+
         if (this.Result.getRows() == null) {
             this.RowsofResult = null;
-        }
-        else {
+        } else {
             this.RowsofResult = this.Result.getRows().toArray();
         }
     }
-    
+
     /**
      * Constructor of BQResultset, that initializes all private variables
-     * 
-     * @param bigQueryGetQueryResultResponse
-     *            BigQueryGetQueryResultResponse from Bigquery
-     * @param bqStatementRoot
-     *            Reference of the Statement that creates this Resultset
+     *
+     * @param bigQueryGetQueryResultResponse BigQueryGetQueryResultResponse from Bigquery
+     * @param bqStatementRoot                Reference of the Statement that creates this Resultset
      */
     public BQScrollableResultSet(GetQueryResultsResponse bigQueryGetQueryResultResponse,
-            BQStatementRoot bqStatementRoot) {
+                                 BQStatementRoot bqStatementRoot) {
         logger.debug("Created Scrollable resultset TYPE_SCROLL_INSENSITIVE");
         this.Result = bigQueryGetQueryResultResponse;
         BigInteger maxrow;
         try {
             maxrow = BigInteger.valueOf(bqStatementRoot.getMaxRows());
             this.Result.setTotalRows(maxrow);
-        }
-        catch (SQLException e) {
+        } catch (SQLException e) {
         } // Should not happen.
-        
-        try {            
-            maxFieldSize = bqStatementRoot.getMaxFieldSize(); 
+
+        try {
+            maxFieldSize = bqStatementRoot.getMaxFieldSize();
+        } catch (SQLException e) {
+            // Should not happen.
         }
-        catch (SQLException e) {
-         // Should not happen.
-        }
-        
+
         if (this.Result.getRows() == null) {
             this.RowsofResult = null;
-        }
-        else {
+        } else {
             this.RowsofResult = this.Result.getRows().toArray();
         }
         if (bqStatementRoot instanceof BQStatement) {
             this.Statementreference = (BQStatement) bqStatementRoot;
         }
     }
-    
-    /** {@inheritDoc} */
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public int findColumn(String columnLabel) throws SQLException {
         if (this.isClosed()) {
@@ -133,8 +130,10 @@ public class BQScrollableResultSet extends ScrollableResultset<Object> implement
         }
         throw new BQSQLException("No Such column labeled: " + columnLabel);
     }
-    
-    /** {@inheritDoc} */
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public ResultSetMetaData getMetaData() throws SQLException {
         if (this.isClosed()) {
@@ -142,8 +141,10 @@ public class BQScrollableResultSet extends ScrollableResultset<Object> implement
         }
         return new BQResultsetMetaData(this.Result);
     }
-    
-    /** {@inheritDoc} */
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Object getObject(int columnIndex) throws SQLException {
         // to make the logfiles smaller!
@@ -162,29 +163,28 @@ public class BQScrollableResultSet extends ScrollableResultset<Object> implement
         }
         String Columntype = this.Result.getSchema().getFields()
                 .get(columnIndex - 1).getType();
+
         TableCell field = ((TableRow) this.RowsofResult[this.Cursor]).getF().get(columnIndex - 1);
-        String result = field.getV().toString();
-        if (result == null) {
+
+        if (Data.isNull(field.getV())) {
             this.wasnull = true;
             return null;
-        }
-        else {
+        } else {
+            String result = field.getV().toString();
             this.wasnull = false;
             try {
                 if (Columntype.equals("STRING")) {
-                  //removing the excess byte by the setmaxFiledSize
-                    if(maxFieldSize == 0 || maxFieldSize == Integer.MAX_VALUE){
+                    //removing the excess byte by the setmaxFiledSize
+                    if (maxFieldSize == 0 || maxFieldSize == Integer.MAX_VALUE) {
                         return result;
-                    }
-                    else {
-                        try{ //lets try to remove the excess bytes
+                    } else {
+                        try { //lets try to remove the excess bytes
                             return result.substring(0, maxFieldSize);
-                        }
-                        catch (IndexOutOfBoundsException iout){
+                        } catch (IndexOutOfBoundsException iout) {
                             //we don't need to remove any excess byte
                             return result;
                         }
-                    } 
+                    }
                 }
                 if (Columntype.equals("FLOAT")) {
                     return Float.parseFloat(result);
@@ -195,21 +195,28 @@ public class BQScrollableResultSet extends ScrollableResultset<Object> implement
                 if (Columntype.equals("INTEGER")) {
                     return Long.parseLong(result);
                 }
+                if (Columntype.equals("TIMESTAMP")) {
+                    long val = new BigDecimal(result).longValue() * 1000;
+                    return new Timestamp(val);
+                }
                 throw new BQSQLException("Unsupported Type");
-            }
-            catch (NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 throw new BQSQLException(e);
             }
         }
     }
-    
-    /** {@inheritDoc} */
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Statement getStatement() throws SQLException {
         return this.Statementreference;
     }
-    
-    /** {@inheritDoc} */
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String getString(int columnIndex) throws SQLException {
         //to make the logfiles smaller!
@@ -219,26 +226,25 @@ public class BQScrollableResultSet extends ScrollableResultset<Object> implement
         if (this.isClosed()) {
             throw new BQSQLException("This Resultset is Closed");
         }
-        String result = (String) ((TableRow) this.RowsofResult[this.Cursor]).getF()
-                .get(columnIndex - 1).getV();
-        if (result == null) {
+        TableCell field = ((TableRow) this.RowsofResult[this.Cursor]).getF().get(columnIndex - 1);
+
+        if (Data.isNull(field.getV())) {
             this.wasnull = true;
-        }
-        else {
+            return null;
+        } else {
             this.wasnull = false;
-        }
-        //removing the excess byte by the setmaxFiledSize
-        if(maxFieldSize == 0 || maxFieldSize == Integer.MAX_VALUE){
-            return result;
-        }
-        else {
-            try{ //lets try to remove the excess bytes
-                return result.substring(0, maxFieldSize);
-            }
-            catch (IndexOutOfBoundsException iout){
-                //we don't need to remove any excess byte
+            String result = field.getV().toString();
+            //removing the excess byte by the setmaxFiledSize
+            if (maxFieldSize == 0 || maxFieldSize == Integer.MAX_VALUE) {
                 return result;
+            } else {
+                try { //lets try to remove the excess bytes
+                    return result.substring(0, maxFieldSize);
+                } catch (IndexOutOfBoundsException iout) {
+                    //we don't need to remove any excess byte
+                    return result;
+                }
             }
-        }        
+        }
     }
 }
