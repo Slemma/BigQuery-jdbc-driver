@@ -38,6 +38,7 @@ import java.awt.event.ActionEvent;
 import javax.swing.JCheckBox;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
@@ -53,6 +54,7 @@ import javax.swing.JTable;
 import javax.swing.JScrollPane;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
+import java.util.Properties;
 
 /**
  * A GUI application for the Starschema JDBC Driver, for testing
@@ -290,6 +292,23 @@ public class GUI extends JFrame {
 			//should not happen
 		}
         this.setIconImage(img);
+
+		// try init options from properties file
+		try {
+			Properties properties = new Properties();
+			properties.load(new FileInputStream("installedaccount.properties"));
+			if (properties.getProperty("projectid")!=null){
+				tf_projectId.setText(properties.getProperty("projectid"));
+			}
+			if (properties.getProperty("user")!=null){
+				tf_userName.setText(properties.getProperty("user"));
+			}
+			if (properties.getProperty("password")!=null){
+				tf_pass.setText(properties.getProperty("password"));
+			}
+		} catch (IOException e) {
+			//should not happen
+		}
 	}
 	
 	/**
@@ -302,7 +321,7 @@ public class GUI extends JFrame {
 	 * @return false if we couldn't make a valid connection with these Parameters
 	 */
 	private boolean validParameters(){
-		String sequence = ".,;:_?";
+		String sequence = ".,;:?";
 		
 		if( tf_userName.getText().contains(" ")) {
 			lblInfoText.setText("UserName can't contain \"space\"");
@@ -471,6 +490,7 @@ public class GUI extends JFrame {
 		}
 		try {
 			if(myResult.last()) {
+				while (myResult.next()){}
 				lblInfoText.setText("Connection was successfull");
 				table.setModel(DbUtils.resultSetToTableModel(myResult));
 				table.setVisible(true);
