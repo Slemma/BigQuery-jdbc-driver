@@ -29,7 +29,7 @@ import com.google.api.services.bigquery.model.Job;
 /**
  * This class implements java.sql.Statement
  * 
- * @author Horváth Attila
+ * @author Horvï¿½th Attila
  * @author Balazs Gunics
  * 
  */
@@ -45,8 +45,8 @@ public class BQStatement extends BQStatementRoot implements java.sql.Statement {
         logger.debug("Constructor of BQStatement is running projectid is: " + projectid);
         this.ProjectId = projectid;
         this.connection = bqConnection;
-        //this.resultSetType = ResultSet.TYPE_SCROLL_INSENSITIVE;
-        this.resultSetType = ResultSet.TYPE_FORWARD_ONLY;
+        this.resultSetType = ResultSet.TYPE_SCROLL_INSENSITIVE;
+        //this.resultSetType = ResultSet.TYPE_FORWARD_ONLY;
         this.resultSetConcurrency = ResultSet.CONCUR_READ_ONLY;
     }
     
