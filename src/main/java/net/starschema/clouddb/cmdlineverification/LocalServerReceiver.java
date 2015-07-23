@@ -40,7 +40,7 @@ import org.mortbay.jetty.handler.AbstractHandler;
  * @author Yaniv Inbar
  */
 public final class LocalServerReceiver implements VerificationCodeReceiver {
-    
+
     /**
      * Jetty handler that takes the verifier token passed over from the OAuth
      * provider and stashes it where {@link #waitForCode} will find it.
@@ -93,8 +93,19 @@ public final class LocalServerReceiver implements VerificationCodeReceiver {
     }
     
     private static final String CALLBACK_PATH = "/Callback";
+    private final int port;
     
-    private static int getUnusedPort() throws IOException {
+    /** Server or {@code null} before {@link #getRedirectUri()}. */
+    private Server server;
+
+    /** Verification code or {@code null} before received. */
+    volatile String code;
+
+    public LocalServerReceiver(int port) {
+        this.port = port;
+    }
+
+    public static int getUnusedPort() throws IOException {
         Socket s = new Socket();
         s.bind(null);
         try {
@@ -104,26 +115,18 @@ public final class LocalServerReceiver implements VerificationCodeReceiver {
             s.close();
         }
     }
-    
-    /** Server or {@code null} before {@link #getRedirectUri()}. */
-    private Server server;
-    
-    /** Verification code or {@code null} before received. */
-    volatile String code;
-    
+
     @Override
     public String getRedirectUri() throws Exception {
-        int port = LocalServerReceiver.getUnusedPort();
-        this.server = new Server(port);
+        this.server = new Server(this.port);
         for (Connector c : this.server.getConnectors()) {
             c.setHost("localhost");
         }
         this.server.addHandler(new CallbackHandler());
         this.server.start();
-        return "http://localhost:" + port + LocalServerReceiver.CALLBACK_PATH;
-        
+        return "http://localhost:" + this.port + LocalServerReceiver.CALLBACK_PATH;
     }
-    
+
     @Override
     public void stop() throws Exception {
         if (this.server != null) {

@@ -145,14 +145,15 @@ public class Oauth2Bigquery {
      * Authorizes a bigquery Connection with the given "Installed Application"
      * Clientid and Clientsecret
      *
-     * @param clientid
-     * @param clientsecret
+     * @param clientid Client ID
+     * @param clientsecret Client Secret
+     * @param rcvr Verification Code Reciever
      * @return Authorized bigquery Connection
      * @throws SQLException
      */
     public static Bigquery authorizeviainstalled(String clientid,
-                                                 String clientsecret) throws SQLException {
-        LocalServerReceiver rcvr = new LocalServerReceiver();
+                                                 String clientsecret,
+                                                 VerificationCodeReceiver rcvr) throws SQLException, IOException {
         List<String> Scopes = new ArrayList<String>();
         Scopes.add(BigqueryScopes.BIGQUERY);
         Credential credential = null;

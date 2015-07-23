@@ -44,8 +44,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import net.starschema.clouddb.cmdlineverification.LocalServerReceiver;
 import net.starschema.clouddb.cmdlineverification.Oauth2Bigquery;
 
+import net.starschema.clouddb.cmdlineverification.VerificationCodeReceiver;
 import org.apache.log4j.Logger;
 
 import com.google.api.services.bigquery.Bigquery;
@@ -79,7 +81,9 @@ public class BQConnection implements Connection {
     
     /** Boolean to determine, to use or doesn't use the ANTLR parser */
     private boolean transformQuery = false;
-    
+
+    private int localReceiverPort = 53147;
+
     /** getter for transformQuery */
     public boolean getTransformQuery(){
         return transformQuery;
@@ -202,7 +206,7 @@ public class BQConnection implements Connection {
             logger.debug("from the properties we got for transformQuery the following: " + 
                     lp +" which converts to: " + Boolean.toString(transformQuery));
         }
-        
+
         /**
          * Lets make a connection:
          * 
@@ -222,8 +226,14 @@ public class BQConnection implements Connection {
         }
         //let use Oauth
         else {
-            this.bigquery = Oauth2Bigquery.authorizeviainstalled(userId,userKey);
-            this.logger.info("Authorized with Oauth");
+            try {
+                VerificationCodeReceiver receiver= new LocalServerReceiver(this.localReceiverPort);
+                this.bigquery = Oauth2Bigquery.authorizeviainstalled(userId,userKey,receiver);
+                this.logger.info("Authorized with Oauth");
+            }
+            catch (IOException e) {
+                throw new BQSQLException(e);
+            }
         }
         logger.debug("The project id for this connections is: " + this.projectId);
     }
