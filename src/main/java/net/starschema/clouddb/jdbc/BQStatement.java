@@ -53,7 +53,7 @@ public class BQStatement extends BQStatementRoot implements java.sql.Statement {
     /**
      * Constructor for BQStatement object just initializes local variables
      * 
-     * @param projectid2
+     * @param projectid
      * @param bqConnection
      * @param resultSetType
      * @param resultSetConcurrency
