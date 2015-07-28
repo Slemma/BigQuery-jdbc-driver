@@ -49,6 +49,8 @@ import com.google.api.services.bigquery.model.TableList.Tables;
  * 
  */
 public class BQSupportFuncts {
+    static final String PUBLIC_PROJECT_ID = "publicdata";
+
     /** log4j.Logger instance */
     // static Logger logger = new Logger(BQSupportFuncts.class.getName());
     static Logger logger = Logger.getLogger(BQSupportFuncts.class.getName());
@@ -454,7 +456,7 @@ public class BQSupportFuncts {
             return null;
         }
     }
-    
+
     /**
      * Gets Tables information from specific projects matching catalog,
      * tablenamepattern and datasetidpatterns
@@ -482,21 +484,29 @@ public class BQSupportFuncts {
                 ", schema: " + (schema != null ? schema : "null") + 
                 ", tablename:" + (tablename != null ? tablename : "null") +
                 "connection");
-        //getting the projects for this connection
-        List<Projects> Projects = BQSupportFuncts.getCatalogs(catalog,
-                connection);
-        
-        if (Projects != null && Projects.size() != 0) {
-            for (Projects proj : Projects) {
+
+        List<String> projectIds = new ArrayList<String>();
+        if (catalog == null || !catalog.equalsIgnoreCase(PUBLIC_PROJECT_ID)) {
+            //getting the projects for this connection
+            List<Projects> projects = BQSupportFuncts.getCatalogs(catalog,
+                    connection);
+            for (Projects proj : projects) {
+                projectIds.add(proj.getId());
+            }
+        } else {
+            projectIds.add(PUBLIC_PROJECT_ID);
+        }
+
+        if (projectIds.size() != 0) {
+            for (String projId : projectIds) {
                 List<Datasets> datasetlist = null;
-                datasetlist = BQSupportFuncts.getDatasets(schema, proj.getId(),
+                datasetlist = BQSupportFuncts.getDatasets(schema, projId,
                         connection);
                 if (datasetlist != null && datasetlist.size() != 0) {
                     for (Datasets dataset : datasetlist) {
                         List<Tables> tables = null;
                         
-                        tables = BQSupportFuncts.getTables(tablename, proj
-                                .getId(),
+                        tables = BQSupportFuncts.getTables(tablename, projId,
                                 BQSupportFuncts
                                         .getDatasetIdFromDatasetDotGetId(dataset
                                                 .getId()), connection);
@@ -511,9 +521,9 @@ public class BQSupportFuncts {
                                 logger.debug("Calling connection.getBigquery().tables() " +
                                         "dataset is: " + datasetString +
                                         ", table is: " + tableString +
-                                        ", project is: " + proj.getId().replace("__", ":").replace("_", "."));
+                                        ", project is: " + projId.replace("__", ":").replace("_", "."));
                                 Table tbl = connection.getBigquery().tables()
-                                        .get(proj.getId().replace("__", ":").replace("_", "."),
+                                        .get(projId.replace("__", ":").replace("_", "."),
                                                 datasetString,
                                                 tableString)
                                         .execute();
