@@ -44,7 +44,7 @@ import com.google.api.services.bigquery.model.TableFieldSchema;
 /**
  * This class implements the DatabaseMetadata interface
  * 
- * @author Gunics Balázs, Horváth Attila
+ * @author Gunics Balï¿½zs, Horvï¿½th Attila
  */
 class BQDatabaseMetadata implements DatabaseMetaData {
     
@@ -402,10 +402,10 @@ class BQDatabaseMetadata implements DatabaseMetaData {
         try {
             Tables = BQSupportFuncts.getTables(this.Connection, catalog,
                     schemaPattern, tableNamePattern);
-            if(Tables == null){ //Because of Crystal Reports It's not elegant, but hey it works!
-                Tables = BQSupportFuncts.getTables(this.Connection, schemaPattern,
-                        catalog, tableNamePattern);
-            }
+//            if(Tables == null){ //Because of Crystal Reports It's not elegant, but hey it works!
+//                Tables = BQSupportFuncts.getTables(this.Connection, schemaPattern,
+//                        catalog, tableNamePattern);
+//            }
         }
         catch (IOException e) {
             throw new BQSQLException(e);
@@ -1748,10 +1748,10 @@ class BQDatabaseMetadata implements DatabaseMetaData {
         try {
             tables = BQSupportFuncts.getTables(this.Connection, catalog,
                     schemaPattern, tableNamePattern);
-            if(tables == null) { //because of crystal reports, It's not elegant but hey, it works!
-                tables = BQSupportFuncts.getTables(this.Connection, tableNamePattern,
-                        schemaPattern, catalog);
-            }
+//            if(tables == null) { //because of crystal reports, It's not elegant but hey, it works!
+//                tables = BQSupportFuncts.getTables(this.Connection, tableNamePattern,
+//                        schemaPattern, catalog);
+//            }
         }
         catch (IOException e) {
             throw new BQSQLException(e);
