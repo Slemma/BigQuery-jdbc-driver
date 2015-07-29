@@ -145,7 +145,12 @@ public class BooleanExpressionItem extends Node implements ColumnReferencePlace 
                             case JdbcGrammarParser.LIKEEXPRESSION:
                                 this.type = BooleanExpressionItemType.LIKEEXPRESSION;
                                 this.right = new StringLiteral(child
-                                        .getChild(0).getChild(0).getText());
+                                        .getChild(1).getChild(0).getText(), true);
+                                break;
+                            case JdbcGrammarParser.INEXPRESSION:
+                                this.type = BooleanExpressionItemType.INEXPRESSION;
+                                this.right = new StringLiteral(child
+                                        .getChild(1).getChild(0).getText(), true);
                                 break;
                             case JdbcGrammarParser.COLUMN:
                                 this.right = new ColumnReference(
@@ -243,15 +248,27 @@ public class BooleanExpressionItem extends Node implements ColumnReferencePlace 
     
     @Override
     public String toPrettyString(int level) {
-        if (this.type == BooleanExpressionItemType.COMPARISON) {
-            System.err.println(left.tokenName + " " + right.tokenName);
-            return this.left.toPrettyString() + this.comparisonOperator
-                    + this.right.toPrettyString();
+        switch (this.type) {
+            case COMPARISON:
+                System.err.println(left.tokenName + " " + right.tokenName);
+                return this.left.toPrettyString() + this.comparisonOperator + this.right.toPrettyString();
+            case LIKEEXPRESSION:
+                return this.left.toPrettyString() + " LIKE " + this.right.toPrettyString();
+            case INEXPRESSION:
+                return this.left.toPrettyString() + " IN " + this.right.toPrettyString();
+            default:
+                throw new RuntimeException("Unknown BooleanExpressionItem Type");
         }
-        else {
-            return this.left.toPrettyString() + "LIKE"
-                    + this.right.toPrettyString();
-        }
+
+//        if (this.type == BooleanExpressionItemType.COMPARISON) {
+//            System.err.println(left.tokenName + " " + right.tokenName);
+//            return this.left.toPrettyString() + this.comparisonOperator
+//                    + this.right.toPrettyString();
+//        }
+//        else {
+//            return this.left.toPrettyString() + " LIKE "
+//                    + this.right.toPrettyString();
+//        }
     }
 }
 
@@ -261,5 +278,5 @@ public class BooleanExpressionItem extends Node implements ColumnReferencePlace 
  * <li> COMPARISON
  */
 enum BooleanExpressionItemType {
-    LIKEEXPRESSION, COMPARISON
+    LIKEEXPRESSION, INEXPRESSION, COMPARISON
 }

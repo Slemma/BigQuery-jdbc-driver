@@ -24,52 +24,52 @@ public class GrammarTest {
      */
     Logger logger = Logger.getLogger(this.toString());
     
-//    /**
-//     * Creates a new Connection to bigquery with the jdbc driver
-//     */
-//    @Before
-//    public void NewConnection() {
-//        try {
-//            if (con == null || !con.isValid(0)) {
-//                try {
-//                    Class.forName("net.starschema.clouddb.jdbc.BQDriver");
-//                    con = DriverManager.getConnection(
-//                            BQSupportFuncts.constructUrlFromPropertiesFile(BQSupportFuncts
-//                                    .readFromPropFile("installedaccount.properties")),
-//                            BQSupportFuncts.readFromPropFile("installedaccount.properties"));
-//                }
-//                catch (Exception e) {
-//                    logger.debug("Failed to make connection trough the JDBC driver",e);
-//                }
-//            }
-//            logger.debug("Running the next test");
-//        }
-//        catch (SQLException e) {
-//            logger.fatal("Something went wrong",e);
-//        }
-//    }
-//
-//
-//    static String input;
-//    /**
-//     * to Test the columnresolver from 2 subqueries
-//     */
-//    @Test
-//    public void selectJokerFromSubQueries() {
-//        input = "SELECT * FROM (SELECT aa.*, bb.* FROM efashion.OUTLET_LOOKUP aa, efashion.OUTLET_LOOKUP bb) LIMIT 10;";
-//        logger.info("Runing test: select Joker From SubQueries:" + newLine + input);
-//        ResultSet queryResult = null;
-//        try {
-//            queryResult = con.createStatement().executeQuery(input);
-//        }
-//        catch (SQLException e) {
-//            this.logger.error("SQLexception" + e.toString());
-//            Assert.fail("SQLException" + e.toString());
-//        }
-//        Assert.assertNotNull(queryResult);
-//        HelperFunctions.printer(queryResult);
-//    }
-//
+    /**
+     * Creates a new Connection to bigquery with the jdbc driver
+     */
+    @Before
+    public void NewConnection() {
+        try {
+            if (con == null || !con.isValid(0)) {
+                try {
+                    Class.forName("net.starschema.clouddb.jdbc.BQDriver");
+                    con = DriverManager.getConnection(
+                            BQSupportFuncts.constructUrlFromPropertiesFile(BQSupportFuncts
+                                    .readFromPropFile("installedaccount.properties")),
+                            BQSupportFuncts.readFromPropFile("installedaccount.properties"));
+                }
+                catch (Exception e) {
+                    logger.debug("Failed to make connection trough the JDBC driver",e);
+                }
+            }
+            logger.debug("Running the next test");
+        }
+        catch (SQLException e) {
+            logger.fatal("Something went wrong",e);
+        }
+    }
+
+
+    static String input;
+    /**
+     * to Test the columnresolver from 2 subqueries
+     */
+    @Test
+    public void selectJokerFromSubQueries() {
+        input = "SELECT * FROM (SELECT aa.*, bb.* FROM publicdata:samples.natality aa, publicdata:samples.shakespeare bb) LIMIT 10;";
+        logger.info("Runing test: select Joker From SubQueries:" + newLine + input);
+        ResultSet queryResult = null;
+        try {
+            queryResult = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_READ_ONLY).executeQuery(input);
+        }
+        catch (SQLException e) {
+            this.logger.error("SQLexception" + e.toString());
+            Assert.fail("SQLException" + e.toString());
+        }
+        Assert.assertNotNull(queryResult);
+        HelperFunctions.printer(queryResult);
+    }
+
 //    /** a sample query which passed back by Eclipse Birt */
 //    @Test
 //    public void twoJoin() {
@@ -97,32 +97,31 @@ public class GrammarTest {
 //        Assert.assertNotNull(queryResult);
 //        HelperFunctions.printer(queryResult);
 //    }
-//
-//
-//    /**
-//     *  to test the JOINresolver, it should make a JOIN with it's
-//     *  ONCLAUSE derived by the WHERE clause
-//     */
-//    @Test
-//    public void twoTableWithWhere() {
-//
-//        input = "SELECT * FROM efashion.ARTICLE_LOOKUP a, efashion.ARTICLE_COLOR_LOOKUP b " +
-//        		"WHERE (a.ARTICLE_CODE = b.ARTICLE_CODE);";
-//
-//        logger.info("Running test: twoTableWithWhere \r\n" + input );
-//
-//        ResultSet queryResult = null;
-//        try {
-//            queryResult = con.createStatement().executeQuery(input);
-//        }
-//        catch (SQLException e) {
-//            this.logger.error("SQLexception" + e.toString());
-//            Assert.fail("SQLException" + e.toString());
-//        }
-//        Assert.assertNotNull(queryResult);
-//        HelperFunctions.printer(queryResult);
-//    }
-//
+
+
+    /**
+     *  to test the JOINresolver, it should make a JOIN with it's
+     *  ONCLAUSE derived by the WHERE clause
+     */
+    @Test
+    public void twoTableWithWhere() {
+
+        input = "SELECT * FROM publicdata:samples.shakespeare a, publicdata:samples.shakespeare b WHERE (a.corpus_date = b.corpus_date) LIMIT 10;";
+
+        logger.info("Running test: twoTableWithWhere \r\n" + input );
+
+        ResultSet queryResult = null;
+        try {
+            queryResult = con.createStatement().executeQuery(input);
+        }
+        catch (SQLException e) {
+            this.logger.error("SQLexception" + e.toString());
+            Assert.fail("SQLException" + e.toString());
+        }
+        Assert.assertNotNull(queryResult);
+        HelperFunctions.printer(queryResult);
+    }
+
 //    /**
 //     * to test the JOINresolver, where there are multiple WHERE conditions
 //     */
@@ -176,29 +175,75 @@ public class GrammarTest {
 //        HelperFunctions.printer(queryResult);
 //    }
 //
-//    /**
-//     * to test the Joinresolver with 2 where clause
-//     */
-//    @Test
-//    public void twoTableWithMultipleWhere() {
-//
+    /**
+     * LIKE operator test
+     */
+    @Test
+    public void testLike() {
+
+        input = "SELECT weight_pounds FROM publicdata:samples.natality WHERE state like 'KY' ORDER BY weight_pounds DESC LIMIT 10";
+        logger.info("Running test: testLike \r\n" + input );
+
+        ResultSet queryResult = null;
+        try {
+            queryResult = con.createStatement().executeQuery(input);
+        }
+        catch (SQLException e) {
+            this.logger.error("SQLexception" + e.toString());
+            Assert.fail("SQLException" + e.toString());
+        }
+        Assert.assertNotNull(queryResult);
+        HelperFunctions.printer(queryResult);
+    }
+
+
+    /**
+     * IN operator test
+     */
+    @Test
+    public void testIn() {
+
+        input = "SELECT weight_pounds FROM publicdata:samples.natality WHERE year in (2006,2007,2008) ORDER BY weight_pounds DESC LIMIT 10";
+        logger.info("Running test: testIn \r\n" + input );
+
+        ResultSet queryResult = null;
+        try {
+            queryResult = con.createStatement().executeQuery(input);
+        }
+        catch (SQLException e) {
+            this.logger.error("SQLexception" + e.toString());
+            Assert.fail("SQLException" + e.toString());
+        }
+        Assert.assertNotNull(queryResult);
+        HelperFunctions.printer(queryResult);
+    }
+
+    /**
+     * to test the Joinresolver with 2 where clause
+     */
+    @Test
+    public void twoTableWithMultipleWhere() {
+
 //        input = "SELECT a.SALE_PRICE,a.ARTICLE_CODE,b.COLOR_LABEL,b.CATEGORY " +
 //        		"FROM efashion.ARTICLE_LOOKUP a, efashion.ARTICLE_COLOR_LOOKUP b " +
 //        		"WHERE (a.ARTICLE_CODE = b.ARTICLE_CODE) AND (a.SALE_PRICE >= 100);";
-//        logger.info("Running test: twoTableWithMultipleWhere \r\n" + input );
-//
-//        ResultSet queryResult = null;
-//        try {
-//            queryResult = con.createStatement().executeQuery(input);
-//        }
-//        catch (SQLException e) {
-//            this.logger.error("SQLexception" + e.toString());
-//            Assert.fail("SQLException" + e.toString());
-//        }
-//        Assert.assertNotNull(queryResult);
-//        HelperFunctions.printer(queryResult);
-//    }
-//
+        input = "SELECT years.year as c0, SUM(fact_t.weight_pounds) as m0 from (SELECT year FROM publicdata:samples.natality GROUP BY year) as years" +
+                ", (SELECT weight_pounds, state, year, gestation_weeks FROM publicdata:samples.natality ORDER BY weight_pounds DESC LIMIT 10) as fact_t"+
+                " WHERE fact_t.year = years.year AND years.year in (2008) GROUP BY c0";
+        logger.info("Running test: twoTableWithMultipleWhere \r\n" + input );
+
+        ResultSet queryResult = null;
+        try {
+            queryResult = con.createStatement().executeQuery(input);
+        }
+        catch (SQLException e) {
+            this.logger.error("SQLexception" + e.toString());
+            Assert.fail("SQLException" + e.toString());
+        }
+        Assert.assertNotNull(queryResult);
+        HelperFunctions.printer(queryResult);
+    }
+
 //    /**
 //     * to test the union of the bigquery we'll make 2 subqueries,
 //     * 1 with 2nd where clause and other with the 3rd where clause

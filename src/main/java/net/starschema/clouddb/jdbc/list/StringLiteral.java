@@ -28,7 +28,8 @@ import net.starschema.clouddb.jdbc.JdbcGrammarParser;
  * @author Balazs Gunics, Attila Horvath
  */
 public class StringLiteral extends Node {
-    
+
+    private final boolean quoted;
     /**
      * to Store the Stringliterals
      * 
@@ -36,20 +37,27 @@ public class StringLiteral extends Node {
      *            - this will be stored at the data field
      */
     public StringLiteral(String string) {
-        this.tokenType = JdbcGrammarParser.STRINGLIT;        
-        this.tokenName = JdbcGrammarParser.tokenNames[this.tokenType];
-        this.logger.debug("BUILDING " + this.tokenName);        
-        this.data = string;
+        this(string, false);
     }
-    
+
+    public StringLiteral(String string, boolean quoted) {
+        this.tokenType = JdbcGrammarParser.STRINGLIT;
+        this.tokenName = JdbcGrammarParser.tokenNames[this.tokenType];
+        this.logger.debug("BUILDING " + this.tokenName);
+        this.data = string;
+        this.quoted = quoted;
+    }
+
     @Override
     public String toPrettyString(int level) {
-        //since we store the Ints as String, we'll try to parse them to Int, 
-        try{
-            Integer.parseInt(this.data);
-        }
-        catch (NumberFormatException nfe){
-            return "'" + this.data + "'";
+        //since we store the Ints as String, we'll try to parse them to Int,
+        if (!this.quoted) {
+            try{
+                Integer.parseInt(this.data);
+            }
+            catch (NumberFormatException nfe){
+                return "'" + this.data + "'";
+            }
         }
         return this.data;
     }

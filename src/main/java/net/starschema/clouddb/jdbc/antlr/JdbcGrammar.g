@@ -248,6 +248,7 @@ exprlvl1
 fragment BOOLEANEXPRESSIONITEMLEFT:;
 fragment BOOLEANEXPRESSIONITEMRIGHT:;
 fragment LIKEEXPRESSION:;
+fragment INEXPRESSION:;
 fragment BOOLEANEXPRESSIONITEM:;
 /**
 Rule to parse a condition expression used in HAVING and WHERE, creates Tree node BOOLEANEXPRESSION and nested column? subquery? comparisonoperator? column? subquery?
@@ -259,12 +260,13 @@ exprcondition
       s1=exprconditioncore
       (
           (LIKEKEYWORD likeclause)
+      |   (INKEYWORD inclause)
       |   (comparisonoperator
               (s2=exprconditioncore|s3=number)
               
           )
       )
-  )->^(BOOLEANEXPRESSIONITEM ^(BOOLEANEXPRESSIONITEMLEFT $s1) comparisonoperator?  ^(BOOLEANEXPRESSIONITEMRIGHT likeclause? $s2? $s3?) ^(TEXT TEXT[$exprcondition.text]))
+  )->^(BOOLEANEXPRESSIONITEM ^(BOOLEANEXPRESSIONITEMLEFT $s1) comparisonoperator?  ^(BOOLEANEXPRESSIONITEMRIGHT likeclause? inclause? $s2? $s3?) ^(TEXT TEXT[$exprcondition.text]))
 ;
 
 exprconditioncore:
@@ -742,11 +744,23 @@ Rule to parse an sql like expression
 */
 likeclause
 :
-    LIKEKEYWORD likesubclause -> ^(LIKEEXPRESSION likesubclause)
+    likesubclause -> ^(LIKEEXPRESSION likesubclause) ^(TEXT TEXT[$likeclause.text])
 ;
 
 likesubclause:
 SINGLEQUOTE! (~(SINGLEQUOTE | DOUBLEQUOTE | NL ) | (ESCAPEDSINGLEQUOTE|ESCAPEDDOUBLEQUOTE))* SINGLEQUOTE!
+;
+
+/**
+Rule to parse an sql in expression
+*/
+
+inclause:
+    insubclause -> ^(INEXPRESSION insubclause) ^(TEXT TEXT[$inclause.text])
+;
+
+insubclause:
+LPARAM (.)* RPARAM
 ;
 
 /**

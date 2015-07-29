@@ -55,6 +55,9 @@ GROUPKEYWORD:   G R O U P;
 /** HAVING keyword, case insensitive */
 HAVINGKEYWORD:  H A V I N G;
 
+/** IN keyword, case insensitive */ 
+INKEYWORD:    I N ;
+
 /** INNER keyword, case insensitive */
 INNERKEYWORD:   I N N E R;
 
