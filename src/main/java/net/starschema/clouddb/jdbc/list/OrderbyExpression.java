@@ -98,6 +98,18 @@ public class OrderbyExpression extends Node {
         for (Node node : this.children) {
             result += node.toPrettyString() + ", ";
         }
+
+        //workaround for transformation bug
+        if (this.selectStatement.parent!=null) {
+            String parentSelectAlias = this.selectStatement.parent.getAlias();
+            if (parentSelectAlias!=null){
+                String parentSelectPrefix = parentSelectAlias + ".";
+                if (result.indexOf(parentSelectPrefix)!=-1) {
+                    result = result.replace(parentSelectPrefix,"");
+                }
+            }
+        }
+
         result = result.substring(0, result.length() - 2);
         return result;
     }

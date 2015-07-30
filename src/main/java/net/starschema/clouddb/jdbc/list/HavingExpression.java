@@ -103,6 +103,18 @@ public class HavingExpression extends Node {
     
     @Override
     public String toPrettyString(int level) {
-        return "HAVING " + this.expression.toPrettyString();
+        //workaround for transformation bug
+        String havingClause = this.expression.toPrettyString();
+        if (this.selectStatement.parent!=null) {
+            String parentSelectAlias = this.selectStatement.parent.getAlias();
+            if (parentSelectAlias!=null){
+                String parentSelectPrefix = parentSelectAlias + ".";
+                if (havingClause.indexOf(parentSelectPrefix)!=-1) {
+                    havingClause = havingClause.replace(parentSelectPrefix,"");
+                }
+            }
+        }
+
+        return "HAVING " + havingClause;
     }
 }

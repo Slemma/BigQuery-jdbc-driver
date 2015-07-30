@@ -106,6 +106,18 @@ public class GroupByExpression extends Node implements ColumnReferencePlace {
             forreturn += newline + this.tab(level + 1)
                     + column.toPrettyString(level) + ",";
         }
+
+        //workaround for transformation bug
+        if (this.selectStatement.parent!=null) {
+            String parentSelectAlias = this.selectStatement.parent.getAlias();
+            if (parentSelectAlias!=null){
+                String parentSelectPrefix = parentSelectAlias + ".";
+                if (forreturn.indexOf(parentSelectPrefix)!=-1) {
+                    forreturn = forreturn.replace(parentSelectPrefix,"");
+                }
+            }
+        }
+
         return forreturn.substring(0, forreturn.length() - 1);
     }
 }
