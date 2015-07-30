@@ -24,6 +24,7 @@ package BQJDBC.QueryResultTest;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Properties;
 
 import junit.framework.Assert;
 //import net.starschema.clouddb.bqjdbc.logging.Logger;
@@ -83,13 +84,15 @@ public class Timeouttest {
                 try {
                     
                     Class.forName("net.starschema.clouddb.jdbc.BQDriver");
+
+                    Properties properties = BQSupportFuncts.readFromPropFile("installedaccount.properties");
+                    properties.setProperty("transformQuery","false");
+
                     Timeouttest.con = DriverManager
                             .getConnection(
                                     BQSupportFuncts
-                                            .constructUrlFromPropertiesFile(BQSupportFuncts
-                                                    .readFromPropFile("serviceaccount.properties")),
-                                    BQSupportFuncts
-                                            .readFromPropFile("serviceaccount.properties"));
+                                            .constructUrlFromPropertiesFile(properties),
+                                    properties);
                 }
                 catch (Exception e) {
                     this.logger.error("Error in connection" + e.toString());

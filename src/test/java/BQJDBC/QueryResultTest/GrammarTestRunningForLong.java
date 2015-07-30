@@ -5,6 +5,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Properties;
 
 import junit.framework.Assert;
 import net.starschema.clouddb.jdbc.BQSupportFuncts;
@@ -25,19 +26,22 @@ public class GrammarTestRunningForLong {
      */
     Logger logger = Logger.getLogger(this.toString());
 
-//    /**
-//     * Creates a new Connection to bigquery with the jdbc driver
-//     */
+    /**
+     * Creates a new Connection to bigquery with the jdbc driver
+     */
 //    @Before
 //    public void NewConnection() {
 //        try {
 //            if (con == null || !con.isValid(0)) {
 //                try {
 //                    Class.forName("net.starschema.clouddb.jdbc.BQDriver");
+//
+//                    Properties properties = BQSupportFuncts.readFromPropFile("installedaccount.properties");
+//                    properties.setProperty("transformQuery","true");
+//
 //                    con = DriverManager.getConnection(
-//                            BQSupportFuncts.constructUrlFromPropertiesFile(BQSupportFuncts
-//                                    .readFromPropFile("installedaccount.properties")),
-//                            BQSupportFuncts.readFromPropFile("installedaccount.properties"));
+//                            BQSupportFuncts.constructUrlFromPropertiesFile(properties),
+//                            properties);
 //                }
 //                catch (Exception e) {
 //                    logger.debug("Failed to make connection trough the JDBC driver",e);

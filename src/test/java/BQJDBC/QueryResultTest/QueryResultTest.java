@@ -34,6 +34,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Properties;
 //import net.starschema.clouddb.bqjdbc.logging.Logger;
 
 /**
@@ -79,13 +80,15 @@ public class QueryResultTest {
                 this.logger.info("Testing the JDBC driver");
                 try {
                     Class.forName("net.starschema.clouddb.jdbc.BQDriver");
+
+                    Properties properties = BQSupportFuncts.readFromPropFile("installedaccount.properties");
+                    properties.setProperty("transformQuery","true");
+
                     QueryResultTest.con = DriverManager
                             .getConnection(
                                     BQSupportFuncts
-                                            .constructUrlFromPropertiesFile(BQSupportFuncts
-                                                    .readFromPropFile("serviceaccount.properties")),
-                                    BQSupportFuncts
-                                            .readFromPropFile("serviceaccount.properties"));
+                                            .constructUrlFromPropertiesFile(properties),
+                                    properties);
                 }
                 catch (Exception e) {
                     this.logger.error("Error in connection" + e.toString());
@@ -101,44 +104,44 @@ public class QueryResultTest {
         }
     }
           
-    @Test
-    public void QueryResultTest01() {
-        final String sql = "SELECT TOP(word, 10), COUNT(*) FROM publicdata:samples.shakespeare";
-        final String description = "The top 10 word from shakespeare #TOP #COUNT";
-        String[][] expectation = new String[][] {
-//                {"you", "yet", "would", "world", "without", "with", "your", "young",
-//                    "words", "word"},
-//                { "42", "42", "42", "42", "42", "42", "41", "41", "41", "41" } };
-                { "you", "yet", "would", "world", "without", "with", "will",
-                        "why", "whose", "whom" },
-                { "42", "42", "42", "42", "42", "42", "42", "42", "42", "42" } };
-
-        this.logger.info("Test number: 01");
-        this.logger.info("Running query:" + sql);
-        
-        java.sql.ResultSet Result = null;
-        try {
-            Result = QueryResultTest.con.createStatement().executeQuery(sql);
-        }
-        catch (SQLException e) {
-            this.logger.error("SQLexception" + e.toString());
-            Assert.fail("SQLException" + e.toString());
-        }
-        Assert.assertNotNull(Result);
-        
-        this.logger.debug(description);
-        HelperFunctions.printer(expectation);
-        try {
-            Assert.assertTrue(
-                    "Comparing failed in the String[][] array",
-                    this.comparer(expectation,
-                            BQSupportMethods.GetQueryResult(Result)));
-        }
-        catch (SQLException e) {
-            this.logger.error("SQLexception" + e.toString());
-            Assert.fail(e.toString());
-        }
-    }
+//    @Test
+//    public void QueryResultTest01() {
+//        final String sql = "SELECT TOP(word, 10), COUNT(*) FROM publicdata:samples.shakespeare";
+//        final String description = "The top 10 word from shakespeare #TOP #COUNT";
+//        String[][] expectation = new String[][] {
+////                {"you", "yet", "would", "world", "without", "with", "your", "young",
+////                    "words", "word"},
+////                { "42", "42", "42", "42", "42", "42", "41", "41", "41", "41" } };
+//                { "you", "yet", "would", "world", "without", "with", "will",
+//                        "why", "whose", "whom" },
+//                { "42", "42", "42", "42", "42", "42", "42", "42", "42", "42" } };
+//
+//        this.logger.info("Test number: 01");
+//        this.logger.info("Running query:" + sql);
+//
+//        java.sql.ResultSet Result = null;
+//        try {
+//            Result = QueryResultTest.con.createStatement().executeQuery(sql);
+//        }
+//        catch (SQLException e) {
+//            this.logger.error("SQLexception" + e.toString());
+//            Assert.fail("SQLException" + e.toString());
+//        }
+//        Assert.assertNotNull(Result);
+//
+//        this.logger.debug(description);
+//        HelperFunctions.printer(expectation);
+//        try {
+//            Assert.assertTrue(
+//                    "Comparing failed in the String[][] array",
+//                    this.comparer(expectation,
+//                            BQSupportMethods.GetQueryResult(Result)));
+//        }
+//        catch (SQLException e) {
+//            this.logger.error("SQLexception" + e.toString());
+//            Assert.fail(e.toString());
+//        }
+//    }
     
     @Test
     public void QueryResultTest02() {

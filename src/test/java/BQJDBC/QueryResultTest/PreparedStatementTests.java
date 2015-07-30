@@ -32,6 +32,7 @@ import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Properties;
 
 import junit.framework.Assert;
 import net.starschema.clouddb.jdbc.BQSupportFuncts;
@@ -80,13 +81,15 @@ public class PreparedStatementTests {
     public void Connect() throws Exception {
         try {
             Class.forName("net.starschema.clouddb.jdbc.BQDriver");
+
+            Properties properties = BQSupportFuncts.readFromPropFile("installedaccount.properties");
+            properties.setProperty("transformQuery","fasle");
+
             PreparedStatementTests.con = DriverManager
                     .getConnection(
                             BQSupportFuncts
-                                    .constructUrlFromPropertiesFile(BQSupportFuncts
-                                            .readFromPropFile("installedaccount.properties")),
-                            BQSupportFuncts
-                                    .readFromPropFile("installedaccount.properties"));
+                                    .constructUrlFromPropertiesFile(properties),
+                            properties);
         }
         catch (Exception e) {
             e.printStackTrace();

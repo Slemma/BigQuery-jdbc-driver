@@ -21,6 +21,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Properties;
 
 import junit.framework.Assert;
 import net.starschema.clouddb.jdbc.BQConnection;
@@ -199,10 +200,13 @@ public class BQForwardOnlyResultSetFunctionTest {
                 this.logger.info("Testing the JDBC driver");
                 try {
                     Class.forName("net.starschema.clouddb.jdbc.BQDriver");
+
+                    Properties properties = BQSupportFuncts.readFromPropFile("installedaccount.properties");
+                    properties.setProperty("transformQuery","false");
+
                     BQForwardOnlyResultSetFunctionTest.con = DriverManager.getConnection(
-                            BQSupportFuncts.constructUrlFromPropertiesFile(BQSupportFuncts
-                                    .readFromPropFile("installedaccount.properties")),
-                            BQSupportFuncts.readFromPropFile("installedaccount.properties"));
+                            BQSupportFuncts.constructUrlFromPropertiesFile(properties),
+                            properties);
                 }
                 catch (Exception e) {
                     e.printStackTrace();

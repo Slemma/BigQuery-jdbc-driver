@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Properties;
 
 import junit.framework.Assert;
 import net.starschema.clouddb.jdbc.BQSupportFuncts;
@@ -33,10 +34,13 @@ public class GrammarTest {
             if (con == null || !con.isValid(0)) {
                 try {
                     Class.forName("net.starschema.clouddb.jdbc.BQDriver");
+
+                    Properties properties = BQSupportFuncts.readFromPropFile("installedaccount.properties");
+                    properties.setProperty("transformQuery","true");
+
                     con = DriverManager.getConnection(
-                            BQSupportFuncts.constructUrlFromPropertiesFile(BQSupportFuncts
-                                    .readFromPropFile("installedaccount.properties")),
-                            BQSupportFuncts.readFromPropFile("installedaccount.properties"));
+                            BQSupportFuncts.constructUrlFromPropertiesFile(properties),
+                            properties);
                 }
                 catch (Exception e) {
                     logger.debug("Failed to make connection trough the JDBC driver",e);
@@ -106,7 +110,7 @@ public class GrammarTest {
     @Test
     public void twoTableWithWhere() {
 
-        input = "SELECT * FROM publicdata:samples.shakespeare a, publicdata:samples.shakespeare b WHERE (a.corpus_date = b.corpus_date) LIMIT 10;";
+        input = "SELECT a.corpus_date FROM publicdata:samples.shakespeare a, publicdata:samples.shakespeare b WHERE (a.corpus_date = b.corpus_date) LIMIT 10;";
 
         logger.info("Running test: twoTableWithWhere \r\n" + input );
 
@@ -227,9 +231,12 @@ public class GrammarTest {
 //        input = "SELECT a.SALE_PRICE,a.ARTICLE_CODE,b.COLOR_LABEL,b.CATEGORY " +
 //        		"FROM efashion.ARTICLE_LOOKUP a, efashion.ARTICLE_COLOR_LOOKUP b " +
 //        		"WHERE (a.ARTICLE_CODE = b.ARTICLE_CODE) AND (a.SALE_PRICE >= 100);";
-        input = "SELECT years.year as c0, SUM(fact_t.weight_pounds) as m0 from (SELECT year FROM publicdata:samples.natality GROUP BY year) as years" +
-                ", (SELECT weight_pounds, state, year, gestation_weeks FROM publicdata:samples.natality ORDER BY weight_pounds DESC LIMIT 10) as fact_t"+
-                " WHERE fact_t.year = years.year AND years.year in (2008) GROUP BY c0";
+        input = "SELECT years.year as c0, SUM(fact_t.weight_pounds) as m0 " +
+                "FROM " +
+                "   (SELECT year FROM publicdata:samples.natality GROUP BY year) as years" +
+                ",  (SELECT weight_pounds, state, year, gestation_weeks FROM publicdata:samples.natality ORDER BY weight_pounds DESC LIMIT 10) as fact_t"+
+                " WHERE " +
+                "fact_t.year = years.year AND years.year in (2008) GROUP BY c0";
         logger.info("Running test: twoTableWithMultipleWhere \r\n" + input );
 
         ResultSet queryResult = null;
