@@ -28,8 +28,10 @@ public class SQLCleaner {
                 if(!columnCall.isPointedTo())
                 {                   
                     //CHECK if its not an end column
-                    if(!(columnCall.getPointedNode()==null)){
-                        expression.children.remove(columnCall);
+                    Node pN = columnCall.getPointedNode();
+                    expression.children.remove(columnCall);
+                    if(pN!=null){
+                        ColumnCall.class.cast(pN).getNodesPointingtoThis().remove(columnCall);
                     }
                 }
             }
