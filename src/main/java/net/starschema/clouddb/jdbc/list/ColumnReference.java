@@ -569,14 +569,16 @@ public class ColumnReference extends Node implements UniQueIdContainer{
         if (this.getPointedNode() != null) {
             if (this.getPointedNode().getTokenType() == JdbcGrammarParser.COLUMN) {
                 String retString = "";
-                if(ColumnCall.class.cast(this.getPointedNode()).parentNode!=null &&
-                        ColumnCall.class.cast(this.getPointedNode()).parentNode.selectStatement!=null &&
-                        ColumnCall.class.cast(this.getPointedNode()).parentNode.selectStatement.parent!=null && 
-                        ColumnCall.class.cast(this.getPointedNode()).parentNode.selectStatement.parent.isPartOfJoin() &&
-                        ColumnCall.class.cast(this.getPointedNode()).parentNode.selectStatement.parent.alias!=null) {
-                    retString = ColumnCall.class.cast(this.getPointedNode()).parentNode.selectStatement.parent.alias+".";
+                ColumnCall columnCall = ColumnCall.class.cast(this.getPointedNode());
+                Expression selectExpression = columnCall.parentNode;
+                if(selectExpression !=null &&
+                        selectExpression.selectStatement!=null &&
+                        selectExpression.selectStatement.parent!=null &&
+                        selectExpression.selectStatement.parent.isPartOfJoin() &&
+                        selectExpression.selectStatement.parent.alias!=null) {
+                    retString = selectExpression.selectStatement.parent.alias+".";
                 }
-                return retString+ColumnCall.class.cast(this.getPointedNode()).uniqueId;
+                return retString+ columnCall.uniqueId;
             }
             else {
                 String retString = "";
