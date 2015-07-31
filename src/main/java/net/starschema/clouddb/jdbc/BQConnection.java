@@ -76,11 +76,20 @@ public class BQConnection implements Connection {
      * The projectid which needed for the queries.
      */
     private String projectId = null;
-    /** Boolean to determine if the Connection is closed */
+    /**
+     * Boolean to determine if the Connection is closed
+     * */
     private boolean isclosed = false;
-    
-    /** Boolean to determine, to use or doesn't use the ANTLR parser */
+
+    /**
+     * Query transformation flag
+     */
     private boolean transformQuery = false;
+
+    /**
+     * Large join flag. If true then "JOIN EACH" else "JOIN"
+     */
+    private boolean largeJoinsEnabled = true;
 
     private int localReceiverPort = 53147;
 
@@ -88,7 +97,11 @@ public class BQConnection implements Connection {
     public boolean getTransformQuery(){
         return transformQuery;
     }
-    
+
+    public boolean getLargeJoinsEnabled(){
+        return largeJoinsEnabled;
+    }
+
     /** List to contain sql warnings in */
     private List<SQLWarning> SQLWarningList = new ArrayList<SQLWarning>();
     
@@ -205,6 +218,23 @@ public class BQConnection implements Connection {
             this.transformQuery = Boolean.parseBoolean(lp);
             logger.debug("from the properties we got for transformQuery the following: " + 
                     lp +" which converts to: " + Boolean.toString(transformQuery));
+        }
+
+        //do we want to use JOIN EACH?
+        if (lowerCasedUrl.contains("largejoinsenabled=true")){
+            this.largeJoinsEnabled=true;
+            this.logger.debug("url contains largejoinsenabled=true");
+        }
+        else {
+            String lp = "";
+            if(loginProp.getProperty("largeJoinsEnabled") != null) lp = loginProp.getProperty("largeJoinsEnabled");
+            if(loginProp.getProperty("LargeJoinsEnabled") != null) lp = loginProp.getProperty("LargeJoinsEnabled");
+            if(loginProp.getProperty("Largejoinsenabled") != null) lp = loginProp.getProperty("Largejoinsenabled");
+            if(loginProp.getProperty("largejoinsenabled") != null) lp = loginProp.getProperty("largejoinsenabled");
+            this.largeJoinsEnabled = false;
+            this.largeJoinsEnabled = Boolean.parseBoolean(lp);
+            logger.debug("from the properties we got for largeJoinsEnabled the following: " +
+                    lp +" which converts to: " + Boolean.toString(largeJoinsEnabled));
         }
 
         /**

@@ -20,6 +20,7 @@ package net.starschema.clouddb.jdbc.list;
 
 import java.util.List;
 
+import net.starschema.clouddb.jdbc.BQConnection;
 import net.starschema.clouddb.jdbc.JdbcGrammarParser;
 import net.starschema.clouddb.jdbc.antlr.sqlparse.ColumnCallException;
 import net.starschema.clouddb.jdbc.antlr.sqlparse.TreeParsingException;
@@ -40,7 +41,7 @@ public class JoinExpression extends Node {
     Node rightItem;
     JoinType type = null;
     OnClause onClause = null;
-    boolean each = false;
+    boolean each = true;
     SelectStatement selectStatement;
     
     
@@ -57,6 +58,7 @@ public class JoinExpression extends Node {
     public JoinExpression(Tree t, TreeBuilder treeBuilder,
             SelectStatement selectStatement) throws TreeParsingException, ColumnCallException {
         this.builder = treeBuilder;
+        this.each = ((BQConnection)treeBuilder.connection).getLargeJoinsEnabled();
         this.selectStatement = selectStatement;
         this.build(t, this.builder);
     }
