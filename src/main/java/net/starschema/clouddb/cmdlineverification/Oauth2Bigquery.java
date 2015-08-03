@@ -88,16 +88,13 @@ public class Oauth2Bigquery {
      *
      * @param transport   HTTP transport
      * @param jsonFactory JSON factory
-     * @param receiver    verification code receiver
      * @param scopes      OAuth 2.0 scopes
      */
     public static Credential authorize(HttpTransport transport,
-                                       JsonFactory jsonFactory, VerificationCodeReceiver receiver,
-                                       List<String> scopes, String clientid, String clientsecret)
+                                       JsonFactory jsonFactory,
+                                       List<String> scopes, String clientid, String clientsecret,
+                                       String refreshToken)
             throws Exception {
-
-        BQXMLCredentialStore Store = new BQXMLCredentialStore(
-                Oauth2Bigquery.PathForXmlStore);
 
         GoogleClientSecrets.Details details = new Details();
         details.setClientId(clientid);
@@ -112,33 +109,11 @@ public class Oauth2Bigquery {
                 .setTransport(CmdlineUtils.getHttpTransport())
                 .setClientSecrets(secr).build();
 
-        if (Store.load(clientid + ":" + clientsecret, CredentialForReturn) == true) {
-            return CredentialForReturn;
-        }
-        try {
-            String redirectUri = receiver.getRedirectUri();
-            GoogleClientSecrets clientSecrets = Oauth2Bigquery
-                    .loadClientSecrets(jsonFactory, clientid, clientsecret);
-            Oauth2Bigquery.codeflow = new GoogleAuthorizationCodeFlow.Builder(
-                    transport, jsonFactory, clientSecrets, scopes)
-                    .setAccessType("offline").setApprovalPrompt("auto")
-                    .setCredentialStore(Store).build();
-            Oauth2Bigquery.browse(Oauth2Bigquery.codeflow.newAuthorizationUrl()
-                    .setRedirectUri(redirectUri).build());
-            // receive authorization code and exchange it for an access token
-            String code = receiver.waitForCode();
-            GoogleTokenResponse response = Oauth2Bigquery.codeflow
-                    .newTokenRequest(code).setRedirectUri(redirectUri)
-                    .execute();
-            // store credential and return it
-
-            // Also ads a RefreshListener, so the token will be always
-            // automatically refreshed.
-            return Oauth2Bigquery.codeflow.createAndStoreCredential(response,
-                    clientid + ":" + clientsecret);
-        } finally {
-            receiver.stop();
-        }
+        CredentialForReturn.setExpiresInSeconds(null);
+        CredentialForReturn.setExpirationTimeMilliseconds(null);
+        CredentialForReturn.setRefreshToken(refreshToken);
+        CredentialForReturn.setAccessToken(null);
+        return CredentialForReturn;
     }
 
     /**
@@ -147,13 +122,12 @@ public class Oauth2Bigquery {
      *
      * @param clientid Client ID
      * @param clientsecret Client Secret
-     * @param rcvr Verification Code Reciever
      * @return Authorized bigquery Connection
      * @throws SQLException
      */
     public static Bigquery authorizeviainstalled(String clientid,
                                                  String clientsecret,
-                                                 VerificationCodeReceiver rcvr) throws SQLException, IOException {
+                                                 String refreshToken) throws SQLException, IOException {
         List<String> Scopes = new ArrayList<String>();
         Scopes.add(BigqueryScopes.BIGQUERY);
         Credential credential = null;
@@ -161,8 +135,8 @@ public class Oauth2Bigquery {
             logger.debug("Authorizing as installed app.");
             credential = Oauth2Bigquery.authorize(
                     CmdlineUtils.getHttpTransport(),
-                    CmdlineUtils.getJsonFactory(), rcvr, Scopes, clientid,
-                    clientsecret);
+                    CmdlineUtils.getJsonFactory(), Scopes, clientid,
+                    clientsecret, refreshToken);
         } catch (Exception e) {
             throw new SQLException(e);
         }
@@ -203,83 +177,6 @@ public class Oauth2Bigquery {
                 CmdlineUtils.getJsonFactory(), credential).build();
         Oauth2Bigquery.servicepath = bigquery.getServicePath();
         return bigquery;
-    }
-
-    /**
-     * Open a browser at the given URL.
-     *
-     * @param url
-     */
-    private static void browse(String url) {
-        // first try the Java Desktop
-        logger.debug("First try the Java Desktop");
-        if (Desktop.isDesktopSupported()) {
-            Desktop desktop = Desktop.getDesktop();
-            if (desktop.isSupported(Action.BROWSE)) {
-                try {
-                    desktop.browse(URI.create(url));
-                    logger.debug("success");
-                    return;
-                } catch (IOException e) {
-                    logger.debug("Failed with desktop.browse", e);
-                    // handled below
-                }
-            }
-        }
-
-
-        // Next try browsers
-        logger.debug("Try with browsers");
-        // Code from Bare Bones Browser Launcher
-        String osName = System.getProperty("os.name");
-        try {
-            if (osName.startsWith("Mac OS")) {
-                logger.debug("Mac OS com.apple.eio.FileManager should handle the URL");
-                Class.forName("com.apple.eio.FileManager")
-                        .getDeclaredMethod("openURL",
-                                new Class[]{String.class})
-                        .invoke(null, new Object[]{url});
-                return;
-            } else if (osName.startsWith("Windows")) {
-                logger.debug("Let's run internet suxplorer! with the URL: " + url);
-                Runtime.getRuntime().exec(
-                        "cmd.exe /c start iexplore.exe \"" + url + "\"");
-                return;
-            } else { // assume Unix or Linux-
-                logger.debug("Unix or Linux, we'll open a browser");
-                String browser = null;
-                for (String b : browsers) {
-                    if (browser == null
-                            && Runtime.getRuntime()
-                            .exec(new String[]{"which", b})
-                            .getInputStream().read() != -1) {
-                        Runtime.getRuntime().exec(
-                                new String[]{browser = b, url});
-                    }
-                }
-            }
-        } catch (Exception e) {
-            logger.debug("Failed", e);
-            // handled below
-        }
-
-        logger.debug("Then try with url.connect");
-        try {
-            URL myURL = new URL(url);
-            URLConnection myURLConnection = myURL.openConnection();
-            myURLConnection.connect();
-            logger.debug("success");
-            return;
-        } catch (Exception e) {
-            logger.debug(null, e);
-            // handled below
-        }
-
-        // Finally just ask user to open in their browser using copy-paste
-        System.out.println("Please open the following URL in your browser:");
-        System.out.println("  " + url);
-        System.err.println("Please open the following URL in your browser:");
-        System.err.println("  " + url);
     }
 
     /**

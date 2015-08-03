@@ -20,8 +20,6 @@
 package net.starschema.clouddb.jdbc;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.security.GeneralSecurityException;
 import java.sql.Array;
 import java.sql.Blob;
@@ -43,16 +41,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-
-import net.starschema.clouddb.cmdlineverification.LocalServerReceiver;
 import net.starschema.clouddb.cmdlineverification.Oauth2Bigquery;
-
-import net.starschema.clouddb.cmdlineverification.VerificationCodeReceiver;
 import org.apache.log4j.Logger;
-
 import com.google.api.services.bigquery.Bigquery;
-
-// import net.starschema.clouddb.bqjdbc.logging.Logger;
 
 /**
  * The connection class which builds the connection between BigQuery and the
@@ -71,11 +62,16 @@ public class BQConnection implements Connection {
      * The bigquery client to access the service.
      */
     private Bigquery bigquery = null;
-    
+
+    /**
+     * Service or installed
+     */
+    private final String type;
+
     /**
      * The projectid which needed for the queries.
      */
-    private String projectId = null;
+    private final String projectId;
     /**
      * Boolean to determine if the Connection is closed
      * */
@@ -84,14 +80,16 @@ public class BQConnection implements Connection {
     /**
      * Query transformation flag
      */
-    private boolean transformQuery = false;
+    private final boolean transformQuery;
 
     /**
-     * Large join flag. If true then "JOIN EACH" else "JOIN"
+     * Service or installed
      */
-    private boolean largeJoinsEnabled = true;
+    private final boolean largeJoinsEnabled;
 
-    private int localReceiverPort = 53147;
+    public String  getType(){
+        return this.type;
+    }
 
     /** getter for transformQuery */
     public boolean getTransformQuery(){
@@ -113,136 +111,45 @@ public class BQConnection implements Connection {
      * 
      * @param url
      *            the JDBC connection URL
-     * @param loginProp
+     * @param info
+     *            connection properties
      * 
-     * @throws GeneralSecurityException
-     * @throws IOException
      * @throws SQLException
      */
-    public BQConnection(String url, Properties loginProp) throws SQLException {
+    public BQConnection(String url, Properties info) throws SQLException {
         
         this.logger = Logger.getLogger(this.getClass());
         this.URLPART = url;
         this.isclosed = false;
-        
-        //If the URL contains user/password we'll use that
-        //If it doesn't we'll look them in the loginProp
-        boolean containUserPassword = false;       
-        String userId;
-        String userKey;
-        
-        boolean serviceAccount = false;
 
-        String projectid;
-        
-        if (url.contains("&user=") && url.contains("&password=")){
-            containUserPassword = true;
-            this.logger.debug("url contains &user and &password");
+        if (info.getProperty("type")!=null) {
+            this.type = info.getProperty("type");
+        } else {
+            this.type = "installed";
         }
-        else this.logger.debug("url doesn't contains &user and &password");
-
-        //getting the user/password for the connection
-        if(containUserPassword)
-        {
-            //getting the User/Password from the URL
-            int passwordindex = url.indexOf("&password=");
-            int userindex = url.indexOf("&user=");           
-            try {
-                userId = URLDecoder.decode(url.substring(
-                        userindex + "&user=".length(), passwordindex), "UTF-8");
-                userKey = URLDecoder.decode(
-                        url.substring(passwordindex + "&password=".length()),
-                        "UTF-8");
-            }
-            catch (UnsupportedEncodingException e2) {
-                throw new BQSQLException(e2);
-            }
+        if (info.getProperty("transformQuery")!=null) {
+            this.transformQuery = Boolean.parseBoolean(info.getProperty("transformQuery"));
+        } else {
+            this.transformQuery = true;
         }
-        else{
-            //getting the User/Password from property
-            userId = loginProp.getProperty("user");
-            userKey = loginProp.getProperty("password");
-        }
-        
-        //getting the project ID
-        try {
-            projectid = URLDecoder.decode(
-                    url.substring(url.lastIndexOf(":") + 1), "UTF-8");
-            this.logger.debug("projectid + end of url: " + projectid);
-            //we either got parameters with ?:
-            if(projectid.contains("?")){
-            this.projectId = projectid.substring(0, projectid.indexOf("?"));
-            }
-            //or we got the projectID right
-            else this.projectId = projectid;
-        }
-        catch (UnsupportedEncodingException e1) {
-            throw new BQSQLException(e1);
-        }
-        //lets replace the : with __ and . with _
-        projectId = projectId.replace(":" , "__").replace(".", "_");
-        //Connect with serviceAccount?
-        String lowerCasedUrl = url.toLowerCase();
-        if (lowerCasedUrl.contains("?withserviceaccount=true")) {
-            serviceAccount = true;
-            this.logger.debug("url contains ?withServiceAccount=true");
-        }
-        else{
-            String sa = "";
-            if(loginProp.getProperty("withServiceAccount") != null) sa = loginProp.getProperty("withServiceAccount");
-            if(loginProp.getProperty("withServiceaccount") != null) sa = loginProp.getProperty("withServiceaccount");
-            if(loginProp.getProperty("withserviceAccount") != null) sa = loginProp.getProperty("withserviceAccount");
-            if(loginProp.getProperty("withserviceaccount") != null) sa = loginProp.getProperty("withserviceaccount");
-            if(loginProp.getProperty("WithServiceAccount") != null) sa = loginProp.getProperty("WithServiceAccount");
-            if(loginProp.getProperty("WithServiceaccount") != null) sa = loginProp.getProperty("WithServiceaccount");
-            if(loginProp.getProperty("WithserviceAccount") != null) sa = loginProp.getProperty("WithserviceAccount");
-            if(loginProp.getProperty("Withserviceaccount") != null) sa = loginProp.getProperty("Withserviceaccount");
-            serviceAccount = false;
-           serviceAccount = Boolean.parseBoolean(sa);
-           logger.debug("from the properties we got for withServiceAccount the following: " + 
-                   sa +" which converts to: " + Boolean.toString(serviceAccount));
-        }
-        
-        //do we want to transform Queries?
-        if (lowerCasedUrl.contains("transformquery=true")){
-            this.transformQuery=true;
-            this.logger.debug("url contains transformQuery=true");
+        if (info.getProperty("largeJoinsEnabled")!=null){
+            this.largeJoinsEnabled = Boolean.parseBoolean(info.getProperty("largeJoinsEnabled"));
         }
         else {
-            String lp = "";
-            if(loginProp.getProperty("transformQuery") != null) lp = loginProp.getProperty("transformQuery");
-            if(loginProp.getProperty("TransformQuery") != null) lp = loginProp.getProperty("TransformQuery");
-            if(loginProp.getProperty("Transformquery") != null) lp = loginProp.getProperty("Transformquery");
-            if(loginProp.getProperty("transformquery") != null) lp = loginProp.getProperty("transformquery");
-            this.transformQuery = false;             
-            this.transformQuery = Boolean.parseBoolean(lp);
-            logger.debug("from the properties we got for transformQuery the following: " + 
-                    lp +" which converts to: " + Boolean.toString(transformQuery));
+            this.largeJoinsEnabled = true;
         }
+        this.projectId = info.getProperty("projectid");
 
-        //do we want to use JOIN EACH?
-        if (lowerCasedUrl.contains("largejoinsenabled=true")){
-            this.largeJoinsEnabled=true;
-            this.logger.debug("url contains largejoinsenabled=true");
-        }
-        else {
-            String lp = "";
-            if(loginProp.getProperty("largeJoinsEnabled") != null) lp = loginProp.getProperty("largeJoinsEnabled");
-            if(loginProp.getProperty("LargeJoinsEnabled") != null) lp = loginProp.getProperty("LargeJoinsEnabled");
-            if(loginProp.getProperty("Largejoinsenabled") != null) lp = loginProp.getProperty("Largejoinsenabled");
-            if(loginProp.getProperty("largejoinsenabled") != null) lp = loginProp.getProperty("largejoinsenabled");
-            this.largeJoinsEnabled = false;
-            this.largeJoinsEnabled = Boolean.parseBoolean(lp);
-            logger.debug("from the properties we got for largeJoinsEnabled the following: " +
-                    lp +" which converts to: " + Boolean.toString(largeJoinsEnabled));
-        }
+        String userId = info.getProperty("user");
+        String userKey = info.getProperty("password");
+        String refreshToken = info.getProperty("refreshToken");
 
         /**
          * Lets make a connection:
          * 
          */
         //do we have a serviceaccount to connect with?
-        if(serviceAccount){
+        if(type.equals("service")){
             try {
                 this.bigquery = Oauth2Bigquery.authorizeviaservice(userId, userKey);
                 this.logger.info("Authorized with service account");
@@ -257,8 +164,7 @@ public class BQConnection implements Connection {
         //let use Oauth
         else {
             try {
-                VerificationCodeReceiver receiver= new LocalServerReceiver(this.localReceiverPort);
-                this.bigquery = Oauth2Bigquery.authorizeviainstalled(userId,userKey,receiver);
+                this.bigquery = Oauth2Bigquery.authorizeviainstalled(userId,userKey,refreshToken);
                 this.logger.info("Authorized with Oauth");
             }
             catch (IOException e) {
@@ -529,8 +435,7 @@ public class BQConnection implements Connection {
      */
     @Override
     public DatabaseMetaData getMetaData() throws SQLException {
-        BQDatabaseMetadata metadata = new BQDatabaseMetadata(this);
-        return metadata;
+        return new BQDatabaseMetadata(this);
     }
     
     /**
@@ -743,9 +648,8 @@ public class BQConnection implements Connection {
         this.logger.debug("Creating Prepared Statement project id is: "
                 + this.projectId + " with parameters:");
         this.logger.debug(sql);
-        PreparedStatement stm = new BQPreparedStatement(sql, this.projectId,
+        return new BQPreparedStatement(sql, this.projectId,
                 this);
-        return stm;
     }
     
     /**
@@ -773,9 +677,8 @@ public class BQConnection implements Connection {
             ", resultSetConcurrency (int) is: " + String.valueOf(resultSetConcurrency)
             +" with parameters:");
         this.logger.debug(sql);
-        PreparedStatement stm = new BQPreparedStatement(sql, this.projectId,
+        return new BQPreparedStatement(sql, this.projectId,
                 this, resultSetType, resultSetConcurrency);
-        return stm;
     }
     
     /**
@@ -897,7 +800,7 @@ public class BQConnection implements Connection {
      * Not implemented yet.
      * </p>
      * 
-     * @throws BQSQLException
+     * @throws SQLClientInfoException
      */
     @Override
     public void setClientInfo(Properties properties)
@@ -914,7 +817,7 @@ public class BQConnection implements Connection {
      * Not implemented yet.
      * </p>
      * 
-     * @throws BQSQLException
+     * @throws SQLClientInfoException
      */
     @Override
     public void setClientInfo(String name, String value)
