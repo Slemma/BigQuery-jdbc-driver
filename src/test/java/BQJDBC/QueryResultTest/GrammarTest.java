@@ -201,7 +201,7 @@ public class GrammarTest {
     }
 
     /**
-     * LIKE operator test
+     * Functional call chain test
      */
     @Test
     public void testFunctionCallChain() {
@@ -214,8 +214,32 @@ public class GrammarTest {
                 ", DAY(repository_created_at) as day\n" +
                 ", STRING(DAY(repository_created_at)) as day_name\n" +
                 "FROM publicdata:samples.github_timeline \n" +
-                "WHERE repository_created_at is not null \n" +
                 "GROUP BY date_id,year, month, month_name, day, day_name;";
+        logger.info("Running test: testLike \r\n" + input );
+
+        ResultSet queryResult = null;
+        try {
+            queryResult = con.createStatement().executeQuery(input);
+        }
+        catch (SQLException e) {
+            this.logger.error("SQLexception" + e.toString());
+            Assert.fail("SQLException" + e.toString());
+        }
+        Assert.assertNotNull(queryResult);
+        HelperFunctions.printer(queryResult);
+    }
+
+    /**
+     * NULL comparision call chain test
+     */
+    @Test
+    public void testNullComparision() {
+
+        input = "SELECT \n" +
+                "YEAR(repository_created_at) as year\n" +
+                "FROM publicdata:samples.github_timeline \n" +
+                "WHERE repository_created_at is not null \n" +
+                "GROUP BY year;";
         logger.info("Running test: testLike \r\n" + input );
 
         ResultSet queryResult = null;
