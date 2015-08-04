@@ -200,6 +200,36 @@ public class GrammarTest {
         HelperFunctions.printer(queryResult);
     }
 
+    /**
+     * LIKE operator test
+     */
+    @Test
+    public void testFunctionCallChain() {
+
+        input = "SELECT \n" +
+                "DATE(repository_created_at) as date_id\n" +
+                ", YEAR(repository_created_at) as year\n" +
+                ", MONTH(repository_created_at) as month\n" +
+                ", STRING(MONTH(repository_created_at)) as month_name\n" +
+                ", DAY(repository_created_at) as day\n" +
+                ", STRING(DAY(repository_created_at)) as day_name\n" +
+                "FROM publicdata:samples.github_timeline \n" +
+//                "WHERE repository_created_at is not null \n" +
+                "GROUP BY date_id,year, month, month_name, day, day_name;";
+        logger.info("Running test: testLike \r\n" + input );
+
+        ResultSet queryResult = null;
+        try {
+            queryResult = con.createStatement().executeQuery(input);
+        }
+        catch (SQLException e) {
+            this.logger.error("SQLexception" + e.toString());
+            Assert.fail("SQLException" + e.toString());
+        }
+        Assert.assertNotNull(queryResult);
+        HelperFunctions.printer(queryResult);
+    }
+
 
     /**
      * IN operator test

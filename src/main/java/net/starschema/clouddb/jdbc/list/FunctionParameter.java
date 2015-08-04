@@ -64,26 +64,30 @@ public class FunctionParameter extends Node implements ColumnReferencePlace {
             this.tokenName = JdbcGrammarParser.tokenNames[t.getType()];
             this.tokenType = t.getType();
             this.logger.debug("BUILDING " + this.tokenName);
-            for (int i = 0; i < t.getChildCount(); i++) {
-                Tree child = t.getChild(i);
-                switch (child.getType()) {
-                    case JdbcGrammarParser.INTEGERPARAM:
-                        this.refObject = new StringLiteral(child.getChild(0)
-                                .getText());
-                        break;
-                    case JdbcGrammarParser.STRINGLIT:
-                        this.refObject = new StringLiteral(child.getChild(0)
-                                .getText());
-                        break;
-                    case JdbcGrammarParser.COLUMN:
-                        this.refObject = new ColumnReference(child, builder,
-                                this.selectStatement,this);
-                        break;
-                    case JdbcGrammarParser.JOKER:
-                        this.refObject = new StringLiteral("*");
-                        break;
-                    default:
-                        break;
+            if (t.getChildCount()==1 && t.getChild(0).getType()==JdbcGrammarParser.TEXT) {
+                this.refObject = new StringLiteral(t.getChild(0).getText(), false);
+            } else {
+                for (int i = 0; i < t.getChildCount(); i++) {
+                    Tree child = t.getChild(i);
+                    switch (child.getType()) {
+                        case JdbcGrammarParser.INTEGERPARAM:
+                            this.refObject = new StringLiteral(child.getChild(0)
+                                    .getText());
+                            break;
+                        case JdbcGrammarParser.STRINGLIT:
+                            this.refObject = new StringLiteral(child.getChild(0)
+                                    .getText());
+                            break;
+                        case JdbcGrammarParser.COLUMN:
+                            this.refObject = new ColumnReference(child, builder,
+                                    this.selectStatement,this);
+                            break;
+                        case JdbcGrammarParser.JOKER:
+                            this.refObject = new StringLiteral("*");
+                            break;
+                        default:
+                            break;
+                    }
                 }
             }
         }

@@ -605,7 +605,8 @@ functionparameters
         |( 
             (functionparameterresume) 
             (COMMA functionparameterresume)* 
-        ) 
+        )
+        | functioncall 
         | joker 
     )->^(FUNCTIONPARAMETERS functionparameterresume* joker? ^(TEXT TEXT[$functionparameters.text]))
 ;
