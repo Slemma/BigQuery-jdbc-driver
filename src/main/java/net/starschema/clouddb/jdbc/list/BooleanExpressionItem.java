@@ -171,7 +171,10 @@ public class BooleanExpressionItem extends Node implements ColumnReferencePlace 
                                 this.right = new StringLiteral(stringLit.substring(0, stringLit.length()-1));
                                 
                                 break;
-                            case JdbcGrammarParser.INTEGERPARAM:                                
+                            case JdbcGrammarParser.NULL_VALUE:
+                                this.right =  new StringLiteral("NULL", true);
+                                break;
+                            case JdbcGrammarParser.INTEGERPARAM:
                                 this.right = new StringLiteral(child
                                         .getChild(0).getChild(0).getText());
                                 break;
@@ -205,7 +208,13 @@ public class BooleanExpressionItem extends Node implements ColumnReferencePlace 
                         break;
                     case JdbcGrammarParser.COMPARISONOPERATOR:
                         this.type = BooleanExpressionItemType.COMPARISON;
-                        this.comparisonOperator = child.getChild(0).getText();
+                        StringBuilder sb = new StringBuilder();
+                        for (int j = 0; j < child.getChildCount(); j++) {
+                            sb.append(" ");
+                            sb.append(child.getChild(j).getText());
+                            sb.append(" ");
+                        }
+                        this.comparisonOperator = sb.toString();
                         break;
                     default:
                         break;

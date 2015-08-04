@@ -262,11 +262,11 @@ exprcondition
           (LIKEKEYWORD likeclause)
       |   (INKEYWORD inclause)
       |   (comparisonoperator
-              (s2=exprconditioncore|s3=number)
+              (s2=exprconditioncore|s3=number|s4=null_value)
               
           )
       )
-  )->^(BOOLEANEXPRESSIONITEM ^(BOOLEANEXPRESSIONITEMLEFT $s1) comparisonoperator?  ^(BOOLEANEXPRESSIONITEMRIGHT likeclause? inclause? $s2? $s3?) ^(TEXT TEXT[$exprcondition.text]))
+  )->^(BOOLEANEXPRESSIONITEM ^(BOOLEANEXPRESSIONITEMLEFT $s1) comparisonoperator?  ^(BOOLEANEXPRESSIONITEMRIGHT likeclause? inclause? $s2? $s3? $s4?) ^(TEXT TEXT[$exprcondition.text]))
 ;
 
 exprconditioncore:
@@ -536,6 +536,12 @@ number
    NUMBER->^(INTEGERPARAM NUMBER)
 ;
 
+/** NULL */
+null_value
+:       
+   NULLKEYWORD->^(NULL_VALUE)
+;
+
 
 fragment JOKERCALL:;
 /**
@@ -662,12 +668,21 @@ comparisonoperatorbase:
   '>'  |
   '<'  |
   '>=' |
-  '<='
+  '<=' |
+  isoperator|
+  isnotoperator
   )
 ;
 
+isoperator
+:
+  ISKEYWORD
+;
 
-
+isnotoperator
+:
+  ISKEYWORD NOTKEYWORD
+;
 
 //--------------------------------------------------------------------------------------------
 //Hidden things

@@ -214,7 +214,7 @@ public class GrammarTest {
                 ", DAY(repository_created_at) as day\n" +
                 ", STRING(DAY(repository_created_at)) as day_name\n" +
                 "FROM publicdata:samples.github_timeline \n" +
-//                "WHERE repository_created_at is not null \n" +
+                "WHERE repository_created_at is not null \n" +
                 "GROUP BY date_id,year, month, month_name, day, day_name;";
         logger.info("Running test: testLike \r\n" + input );
 

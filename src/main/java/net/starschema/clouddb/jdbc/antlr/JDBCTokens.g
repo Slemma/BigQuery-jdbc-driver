@@ -90,6 +90,12 @@ SELECTKEYWORD:  S E L E C T ;
 /** WHERE keyword, case insensitive */
 WHEREKEYWORD:   W H E R E;
 
+/** IS keyword, case insensitive */
+ISKEYWORD:   I S;
+
+/** NULL keyword, case insensitive */
+NULLKEYWORD:   N U L L;
+
 
 
 //Other strings
@@ -210,7 +216,7 @@ fragment TABLENAME:;
 fragment TEXT:;
 fragment WHEREEXPRESSION:;
 fragment EXPRESSIONTEXT:;
-
+fragment NULL_VALUE:;
 
 
 fragment A:('a'|'A');

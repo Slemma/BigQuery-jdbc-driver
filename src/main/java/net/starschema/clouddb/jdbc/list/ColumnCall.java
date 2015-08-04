@@ -83,9 +83,13 @@ public class ColumnCall extends Node implements UniQueIdContainer {
         if(node!=null) {
             boolean found = false;
             for (UniQueIdContainer uniQueIdContainer : nodesPointingtoThis) {
-                if(node.getUniqueid().equals(uniQueIdContainer.getUniqueid())) {
-                    found = true;
-                    break;
+                if (uniQueIdContainer.getUniqueid() != null) {
+                    if(node.getUniqueid().equals(uniQueIdContainer.getUniqueid())) {
+                        found = true;
+                        break;
+                    }
+                } else {
+                    logger.warn("addNodePointingToThis: uniqueId for ColumnReference  is null");
                 }
             }
             if(!found) {
