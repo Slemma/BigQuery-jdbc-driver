@@ -282,9 +282,6 @@ public class GrammarTest {
     @Test
     public void twoTableWithMultipleWhere() {
 
-//        input = "SELECT a.SALE_PRICE,a.ARTICLE_CODE,b.COLOR_LABEL,b.CATEGORY " +
-//        		"FROM efashion.ARTICLE_LOOKUP a, efashion.ARTICLE_COLOR_LOOKUP b " +
-//        		"WHERE (a.ARTICLE_CODE = b.ARTICLE_CODE) AND (a.SALE_PRICE >= 100);";
         input = "SELECT years.year as c0, SUM(fact_t.weight_pounds) as m0 " +
                 "FROM " +
                 "   (SELECT year FROM publicdata:samples.natality GROUP BY year) as years" +
@@ -292,6 +289,37 @@ public class GrammarTest {
                 " WHERE " +
                 "fact_t.year = years.year AND years.year in (2008) GROUP BY c0";
         logger.info("Running test: twoTableWithMultipleWhere \r\n" + input );
+
+        ResultSet queryResult = null;
+        try {
+            queryResult = con.createStatement().executeQuery(input);
+        }
+        catch (SQLException e) {
+            this.logger.error("SQLexception" + e.toString());
+            Assert.fail("SQLException" + e.toString());
+        }
+        Assert.assertNotNull(queryResult);
+        HelperFunctions.printer(queryResult);
+    }
+
+
+    /**
+     * to test the SELECT count From DISTINCT
+     */
+    @Test
+    public void selectCountFromDistinct() {
+
+        input = "select count(*) as c0 from (select distinct calendar.year as c0 from (select\n" +
+                "DATE(repository_created_at) as date_id\n" +
+                ", YEAR(repository_created_at) as year\n" +
+                ", MONTH(repository_created_at) as month\n" +
+                ", STRING(MONTH(repository_created_at)) as month_name\n" +
+                ", DAY(repository_created_at) as day\n" +
+                ", STRING(DAY(repository_created_at)) as day_name\n" +
+                "FROM publicdata:samples.github_timeline\n" +
+                "WHERE repository_created_at is not null\n" +
+                "GROUP BY date_id,year, month, month_name, day, day_name) as calendar) as init";
+        logger.info("Running test: selectCountFromDistinct \r\n" + input );
 
         ResultSet queryResult = null;
         try {
