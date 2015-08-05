@@ -22,7 +22,7 @@
  */
 package BQJDBC.QueryResultTest;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 import net.starschema.clouddb.jdbc.BQConnection;
 import net.starschema.clouddb.jdbc.BQSupportFuncts;
 import net.starschema.clouddb.jdbc.BQSupportMethods;

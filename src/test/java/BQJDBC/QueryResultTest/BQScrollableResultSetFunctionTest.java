@@ -23,13 +23,13 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
 
-import junit.framework.Assert;
 //import net.starschema.clouddb.bqjdbc.logging.Logger;
 import net.starschema.clouddb.jdbc.BQConnection;
 import net.starschema.clouddb.jdbc.BQSupportFuncts;
 import net.starschema.clouddb.jdbc.BQSupportMethods;
 
 import org.apache.log4j.Logger;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -62,7 +62,7 @@ public class BQScrollableResultSetFunctionTest {
         }
         try {
             Assert.assertTrue(BQScrollableResultSetFunctionTest.Result.absolute(10));
-            Assert.assertEquals("whom",
+            Assert.assertEquals("word",
                     BQScrollableResultSetFunctionTest.Result.getString(1));
         }
         catch (SQLException e) {
@@ -110,7 +110,7 @@ public class BQScrollableResultSetFunctionTest {
             BQScrollableResultSetFunctionTest.Result.afterLast();
             Assert.assertTrue(BQScrollableResultSetFunctionTest.Result.isAfterLast());
             Assert.assertTrue(BQScrollableResultSetFunctionTest.Result.absolute(-1));
-            Assert.assertEquals("whom",
+            Assert.assertEquals("word",
                     BQScrollableResultSetFunctionTest.Result.getString(1));
         }
         catch (SQLException e) {
@@ -304,15 +304,22 @@ public class BQScrollableResultSetFunctionTest {
     // Comprehensive Tests:       
     
     public void QueryLoad() {
-        final String sql = "SELECT TOP(word,10) AS word, COUNT(*) as count FROM publicdata:samples.shakespeare";
+        final String sql = "SELECT * FROM\n" +
+                "(SELECT 'you' as word, 42 as count)\n" +
+                ",(SELECT 'yet' as word, 42 as count)\n" +
+                ",(SELECT 'would' as word, 42 as count)\n" +
+                ",(SELECT 'world' as word, 42 as count)\n" +
+                ",(SELECT 'without' as word, 42 as count)\n" +
+                ",(SELECT 'with' as word, 42 as count)\n" +
+                ",(SELECT 'your' as word, 41 as count)\n" +
+                ",(SELECT 'young' as word, 41 as count)\n" +
+                ",(SELECT 'words' as word, 41 as count)\n" +
+                ",(SELECT 'word' as word, 41 as count)\n";
         final String description = "The top 10 word from shakespeare #TOP #COUNT";
         String[][] expectation = new String[][] {
-//                {"you", "yet", "would", "world", "without", "with", "your", "young",
-//                    "words", "word"},
-//                { "42", "42", "42", "42", "42", "42", "41", "41", "41", "41" } };
-                { "you", "yet", "would", "world", "without", "with", "will",
-                        "why", "whose", "whom" },
-                { "42", "42", "42", "42", "42", "42", "42", "42", "42", "42" } };
+                {"you", "yet", "would", "world", "without", "with", "your", "young",
+                    "words", "word"},
+                { "42", "42", "42", "42", "42", "42", "41", "41", "41", "41" } };
         this.logger.info("Test number: 01");
         this.logger.info("Running query:" + sql);
         
@@ -425,7 +432,7 @@ public class BQScrollableResultSetFunctionTest {
         try {
             BQScrollableResultSetFunctionTest.Result.afterLast();
             Assert.assertTrue(BQScrollableResultSetFunctionTest.Result.previous());
-            Assert.assertEquals("whom",
+            Assert.assertEquals("word",
                     BQScrollableResultSetFunctionTest.Result.getString(1));
         }
         catch (SQLException e) {
@@ -509,8 +516,7 @@ public class BQScrollableResultSetFunctionTest {
     public void TestResultSetgetFloat() {
         try {
             Assert.assertTrue(BQScrollableResultSetFunctionTest.Result.absolute(1));
-            Assert.assertEquals(new Float(42),
-                    BQScrollableResultSetFunctionTest.Result.getFloat(2));
+            Assert.assertEquals((float) 42, BQScrollableResultSetFunctionTest.Result.getFloat(2),0.001);
         }
         catch (SQLException e) {
             this.logger.error("SQLexception" + e.toString());
@@ -562,7 +568,7 @@ public class BQScrollableResultSetFunctionTest {
             Assert.assertEquals("you",
                     BQScrollableResultSetFunctionTest.Result.getString(1));
             Assert.assertTrue(BQScrollableResultSetFunctionTest.Result.last());
-            Assert.assertEquals("whom",
+            Assert.assertEquals("word",
                     BQScrollableResultSetFunctionTest.Result.getString(1));
         }
         catch (SQLException e) {

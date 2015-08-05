@@ -6,10 +6,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Properties;
 
-import junit.framework.Assert;
 import net.starschema.clouddb.jdbc.BQSupportFuncts;
 
 import org.apache.log4j.Logger;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -310,15 +310,10 @@ public class GrammarTest {
     public void selectCountFromDistinct() {
 
         input = "select count(*) as c0 from (select distinct calendar.year as c0 from (select\n" +
-                "DATE(repository_created_at) as date_id\n" +
-                ", YEAR(repository_created_at) as year\n" +
-                ", MONTH(repository_created_at) as month\n" +
-                ", STRING(MONTH(repository_created_at)) as month_name\n" +
-                ", DAY(repository_created_at) as day\n" +
-                ", STRING(DAY(repository_created_at)) as day_name\n" +
+                "YEAR(repository_created_at) as year\n" +
                 "FROM publicdata:samples.github_timeline\n" +
                 "WHERE repository_created_at is not null\n" +
-                "GROUP BY date_id,year, month, month_name, day, day_name) as calendar) as init";
+                "GROUP BY year) as calendar) as init";
         logger.info("Running test: selectCountFromDistinct \r\n" + input );
 
         ResultSet queryResult = null;
@@ -332,6 +327,7 @@ public class GrammarTest {
         Assert.assertNotNull(queryResult);
         HelperFunctions.printer(queryResult);
     }
+
 
 //    /**
 //     * to test the union of the bigquery we'll make 2 subqueries,

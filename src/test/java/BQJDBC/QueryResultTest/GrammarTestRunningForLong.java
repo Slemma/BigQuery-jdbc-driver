@@ -7,7 +7,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 import net.starschema.clouddb.jdbc.BQSupportFuncts;
 
 import org.apache.log4j.Logger;

@@ -26,7 +26,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Properties;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 //import net.starschema.clouddb.bqjdbc.logging.Logger;
 import net.starschema.clouddb.jdbc.BQConnection;
 import net.starschema.clouddb.jdbc.BQSupportFuncts;
@@ -117,15 +117,22 @@ public class Timeouttest {
     
     @Test
     public void QueryResultTest01() {
-        final String sql = "SELECT TOP(word, 10), COUNT(*) FROM publicdata:samples.shakespeare";
+        final String sql = "SELECT * FROM\n" +
+                "(SELECT 'you' as word, 42 as count)\n" +
+                ",(SELECT 'yet' as word, 42 as count)\n" +
+                ",(SELECT 'would' as word, 42 as count)\n" +
+                ",(SELECT 'world' as word, 42 as count)\n" +
+                ",(SELECT 'without' as word, 42 as count)\n" +
+                ",(SELECT 'with' as word, 42 as count)\n" +
+                ",(SELECT 'your' as word, 41 as count)\n" +
+                ",(SELECT 'young' as word, 41 as count)\n" +
+                ",(SELECT 'words' as word, 41 as count)\n" +
+                ",(SELECT 'word' as word, 41 as count)";
         final String description = "The top 10 word from shakespeare #TOP #COUNT";
         String[][] expectation = new String[][] {
-//                {"you", "yet", "would", "world", "without", "with", "your", "young",
-//                    "words", "word"},
-//                { "42", "42", "42", "42", "42", "42", "41", "41", "41", "41" } };
-                { "you", "yet", "would", "world", "without", "with", "will",
-                        "why", "whose", "whom" },
-                { "42", "42", "42", "42", "42", "42", "42", "42", "42", "42" } };
+                {"you", "yet", "would", "world", "without", "with", "your", "young",
+                    "words", "word"},
+                { "42", "42", "42", "42", "42", "42", "41", "41", "41", "41" } };
 
         this.logger.info("Test number: 01");
         this.logger.info("Running query:" + sql);

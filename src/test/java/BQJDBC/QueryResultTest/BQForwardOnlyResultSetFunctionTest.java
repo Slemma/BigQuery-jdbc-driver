@@ -23,7 +23,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 import net.starschema.clouddb.jdbc.BQConnection;
 import net.starschema.clouddb.jdbc.BQSupportFuncts;
 
@@ -227,7 +227,17 @@ public class BQForwardOnlyResultSetFunctionTest {
       
     
     public void QueryLoad() {
-        final String sql = "SELECT TOP(word,10) AS word, COUNT(*) as count FROM publicdata:samples.shakespeare";     
+        final String sql = "SELECT * FROM\n" +
+                "(SELECT 'you' as word, 42 as count)\n" +
+                ",(SELECT 'yet' as word, 42 as count)\n" +
+                ",(SELECT 'would' as word, 42 as count)\n" +
+                ",(SELECT 'world' as word, 42 as count)\n" +
+                ",(SELECT 'without' as word, 42 as count)\n" +
+                ",(SELECT 'with' as word, 42 as count)\n" +
+                ",(SELECT 'your' as word, 41 as count)\n" +
+                ",(SELECT 'young' as word, 41 as count)\n" +
+                ",(SELECT 'words' as word, 41 as count)\n" +
+                ",(SELECT 'word' as word, 41 as count)";
         this.logger.info("Test number: 01");
         this.logger.info("Running query:" + sql);
         
@@ -301,8 +311,7 @@ public class BQForwardOnlyResultSetFunctionTest {
     public void TestResultSetgetFloat() {
         try {
             Assert.assertTrue(Result.next());
-            Assert.assertEquals(new Float(42),
-                    BQForwardOnlyResultSetFunctionTest.Result.getFloat(2));
+            Assert.assertEquals((float)42, BQForwardOnlyResultSetFunctionTest.Result.getFloat(2),0.001);
         }
         catch (SQLException e) {
             this.logger.error("SQLexception" + e.toString());
@@ -368,16 +377,16 @@ public class BQForwardOnlyResultSetFunctionTest {
             Assert.assertEquals("with",
                     BQForwardOnlyResultSetFunctionTest.Result.getString(1));
             Assert.assertTrue(BQForwardOnlyResultSetFunctionTest.Result.next());
-            Assert.assertEquals("will",
+            Assert.assertEquals("your",
                     BQForwardOnlyResultSetFunctionTest.Result.getString(1));
             Assert.assertTrue(BQForwardOnlyResultSetFunctionTest.Result.next());
-            Assert.assertEquals("why",
+            Assert.assertEquals("young",
                     BQForwardOnlyResultSetFunctionTest.Result.getString(1));
             Assert.assertTrue(BQForwardOnlyResultSetFunctionTest.Result.next());
-            Assert.assertEquals("whose",
+            Assert.assertEquals("words",
                     BQForwardOnlyResultSetFunctionTest.Result.getString(1));
             Assert.assertTrue(BQForwardOnlyResultSetFunctionTest.Result.next());
-            Assert.assertEquals("whom",
+            Assert.assertEquals("word",
                     BQForwardOnlyResultSetFunctionTest.Result.getString(1));
             Assert.assertFalse(BQForwardOnlyResultSetFunctionTest.Result.next());
         }

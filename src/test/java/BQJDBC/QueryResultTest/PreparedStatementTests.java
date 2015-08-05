@@ -34,10 +34,10 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Properties;
 
-import junit.framework.Assert;
 import net.starschema.clouddb.jdbc.BQSupportFuncts;
 import net.starschema.clouddb.jdbc.BQSupportMethods;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
