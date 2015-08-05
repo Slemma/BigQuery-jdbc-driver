@@ -192,7 +192,11 @@ public class FunctionCall extends Node implements UniQueIdContainer{
         }
         result = result.substring(0, result.length() - 1);
         result += ")";
-        return result+" AS "+this.uniqueId;
+        if (this.parentNode != null && this.parentNode.tokenType == JdbcGrammarParser.EXPRESSION) {
+            return result+" AS "+this.uniqueId;
+        } else {
+            return result;
+        }
     }
     
     /** Getter for the UniqueID */

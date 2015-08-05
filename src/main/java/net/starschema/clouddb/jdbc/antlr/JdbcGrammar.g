@@ -614,7 +614,7 @@ functionparameters
         )
         | functioncall 
         | joker 
-    )->^(FUNCTIONPARAMETERS functionparameterresume* joker? ^(TEXT TEXT[$functionparameters.text]))
+    )->^(FUNCTIONPARAMETERS functionparameterresume* functioncall? joker? ^(TEXT TEXT[$functionparameters.text]))
 ;
 
 fragment JOKER:;
