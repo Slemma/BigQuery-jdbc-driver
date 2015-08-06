@@ -31,7 +31,9 @@ public class SQLCleaner {
                     Node pN = columnCall.getPointedNode();
                     expression.children.remove(columnCall);
                     if(pN!=null){
-                        ColumnCall.class.cast(pN).getNodesPointingtoThis().remove(columnCall);
+                        if (ColumnCall.class.isInstance(pN)){
+                            ColumnCall.class.cast(pN).getNodesPointingtoThis().remove(columnCall);
+                        }
                     }
                 }
             }

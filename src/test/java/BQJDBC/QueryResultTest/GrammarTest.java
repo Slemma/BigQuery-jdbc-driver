@@ -126,6 +126,50 @@ public class GrammarTest {
         HelperFunctions.printer(queryResult);
     }
 
+    /**
+     *  to test the JOINresolver, it should make a JOIN with it's
+     *  ONCLAUSE derived by the WHERE clause
+     */
+    @Test
+    public void joinTwoTablesInSubQuery() {
+
+        input = "SELECT\n" +
+                "  calendar.year                AS c0,\n" +
+                "  calendar.month               AS c1,\n" +
+                "  calendar.day                 AS c2,\n" +
+                "  sum(fact_t.repository_forks) AS m0\n" +
+                "FROM (SELECT\n" +
+                "        TIMESTAMP(DATE(repository_created_at))               AS date_id,\n" +
+                "        YEAR(repository_created_at)                          AS year,\n" +
+                "        MONTH(repository_created_at)                         AS month,\n" +
+                "        DAY(repository_created_at)                           AS day\n" +
+                "      FROM publicdata:samples.github_timeline\n" +
+                "      GROUP BY date_id, year, month, day) AS calendar\n" +
+                "      , (SELECT\n" +
+                "            TIMESTAMP(DATE(\n" +
+                "                          repository_created_at)) AS fact_date_id,\n" +
+                "            repository_url,\n" +
+                "            repository_forks,\n" +
+                "            repository_open_issues\n" +
+                "          FROM\n" +
+                "            publicdata:samples.github_timeline) AS fact_t\n" +
+                "WHERE fact_t.fact_date_id = calendar.date_id\n" +
+                "GROUP BY c0, c1, c2";
+
+        logger.info("Running test: twoTableWithWhere \r\n" + input );
+
+        ResultSet queryResult = null;
+        try {
+            queryResult = con.createStatement().executeQuery(input);
+        }
+        catch (SQLException e) {
+            this.logger.error("SQLexception" + e.toString());
+            Assert.fail("SQLException" + e.toString());
+        }
+        Assert.assertNotNull(queryResult);
+        HelperFunctions.printer(queryResult);
+    }
+
 //    /**
 //     * to test the JOINresolver, where there are multiple WHERE conditions
 //     */
@@ -185,7 +229,32 @@ public class GrammarTest {
     @Test
     public void testLike() {
 
-        input = "SELECT weight_pounds FROM publicdata:samples.natality WHERE state like 'KY' ORDER BY weight_pounds DESC LIMIT 10";
+        input = "SELECT weight_pounds FROM publicdata:samples.natality WHERE state like 'KY%' ORDER BY weight_pounds DESC LIMIT 10";
+        logger.info("Running test: testLike \r\n" + input );
+
+        ResultSet queryResult = null;
+        try {
+            queryResult = con.createStatement().executeQuery(input);
+        }
+        catch (SQLException e) {
+            this.logger.error("SQLexception" + e.toString());
+            Assert.fail("SQLException" + e.toString());
+        }
+        Assert.assertNotNull(queryResult);
+        HelperFunctions.printer(queryResult);
+    }
+
+
+    /**
+     * Time formatting test
+     */
+    @Test
+    public void testFunctionCallTimeFormatting() {
+
+        input = "SELECT\n" +
+                "  STRFTIME_UTC_USEC(repository_created_at,'%Y-%m-%d') as day_name\n" +
+                "FROM publicdata:samples.github_timeline\n" +
+                "LIMIT 10;";
         logger.info("Running test: testLike \r\n" + input );
 
         ResultSet queryResult = null;

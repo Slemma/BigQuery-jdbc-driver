@@ -48,7 +48,8 @@ public class Resolver {
         }
         List<ColumnCall> columns = expression.getColumns();
         List<FunctionCall> functionCalls = expression.getFunctionCalls();
-        
+
+        //TODO: Is this correct? Check it with test joinTwoTablesInSubQuery
         if (functionCalls != null) {
             this.logger.debug("HAS FUNCTIONCALLS");
             for (FunctionCall functionCall : functionCalls) {
