@@ -627,6 +627,9 @@ functionparameterresume
 (mystringliteral | column | number)
 ;
 
+QUOTED_STRING:
+SINGLEQUOTE (~(SINGLEQUOTE | NL ) | (ESCAPEDSINGLEQUOTE))* SINGLEQUOTE
+;
 
 /** SingelQuote stringliteral for functionparamteres */
 mystringliteral
@@ -635,7 +638,8 @@ literal->^(STRINGLIT literal ^(TEXT TEXT[$mystringliteral.text]))
 ;
 literal
 :
-(SINGLEQUOTE! (~(SINGLEQUOTE | NL ) | (ESCAPEDSINGLEQUOTE))* SINGLEQUOTE!)
+//(SINGLEQUOTE! (~(SINGLEQUOTE | NL ) | (ESCAPEDSINGLEQUOTE))* SINGLEQUOTE!)
+QUOTED_STRING
 ;
 
 /**    Java style Stringliteral and singlequoted*/
@@ -764,7 +768,8 @@ likeclause
 ;
 
 likesubclause:
-SINGLEQUOTE! (~(SINGLEQUOTE | DOUBLEQUOTE | NL ) | (ESCAPEDSINGLEQUOTE|ESCAPEDDOUBLEQUOTE))* SINGLEQUOTE!
+//SINGLEQUOTE! (~(SINGLEQUOTE | DOUBLEQUOTE | NL ) | (ESCAPEDSINGLEQUOTE|ESCAPEDDOUBLEQUOTE))* SINGLEQUOTE!
+QUOTED_STRING
 ;
 
 /**

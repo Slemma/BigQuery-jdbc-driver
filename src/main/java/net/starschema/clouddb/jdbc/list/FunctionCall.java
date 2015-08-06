@@ -113,8 +113,13 @@ public class FunctionCall extends Node implements UniQueIdContainer{
                 Tree child = t.getChild(i);
                 switch (child.getType()) {
                     case JdbcGrammarParser.FUNCTIONPARAMETERS:
-                        this.children.addLast(new FunctionParameter(child,
-                                builder, this.selectStatement));
+                        for (int j = 0; j < child.getChildCount(); j++) {
+                            Tree paramChild = child.getChild(j);
+                            if (paramChild.getType()!=JdbcGrammarParser.TEXT){
+                                this.children.addLast(new FunctionParameter(paramChild,
+                                        builder, this.selectStatement));
+                            }
+                        }
                         break;
                     case JdbcGrammarParser.ALIAS:
                         this.alias = child.getChild(0).getText();

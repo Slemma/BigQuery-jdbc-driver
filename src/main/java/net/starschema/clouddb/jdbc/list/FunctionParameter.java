@@ -32,6 +32,7 @@ import org.antlr.runtime.tree.Tree;
 public class FunctionParameter extends Node implements ColumnReferencePlace {
     
     Node refObject;
+    Node parentNode;
     SelectStatement selectStatement;
     
     TreeBuilder builder;
@@ -60,40 +61,33 @@ public class FunctionParameter extends Node implements ColumnReferencePlace {
      * @throws TreeParsingException
      */
     public void build(Tree t, TreeBuilder builder) throws TreeParsingException {
-        if (t.getType() == JdbcGrammarParser.FUNCTIONPARAMETERS) {
-            this.tokenName = JdbcGrammarParser.tokenNames[t.getType()];
-            this.tokenType = t.getType();
-            this.logger.debug("BUILDING " + this.tokenName);
-            for (int i = 0; i < t.getChildCount(); i++) {
-                Tree child = t.getChild(i);
-                switch (child.getType()) {
-                    case JdbcGrammarParser.INTEGERPARAM:
-                        this.refObject = new StringLiteral(child.getChild(0)
-                                .getText());
-                        break;
-                    case JdbcGrammarParser.STRINGLIT:
-                        this.refObject = new StringLiteral(child.getChild(0)
-                                .getText());
-                        break;
-                    case JdbcGrammarParser.COLUMN:
-                        this.refObject = new ColumnReference(child, builder,
-                                this.selectStatement,this);
-                        break;
-                    case JdbcGrammarParser.FUNCTIONCALL:
-                        this.refObject = new FunctionCall(child, builder,
-                                this.selectStatement);
-                        break;
-                    case JdbcGrammarParser.JOKER:
-                        this.refObject = new StringLiteral("*", true);
-                        break;
-                    default:
-                        break;
-                }
-            }
-        }
-        else {
-            throw new TreeParsingException(
-                    "This Tree is not a FUNCTIONPARAMETER");
+        this.tokenName = JdbcGrammarParser.tokenNames[t.getType()];
+        //TODO: fix broken logic - now tokenType for FunctionParameter node is JdbcGrammarParser.FUNCTIONPARAMETERS
+        this.tokenType = t.getParent().getType();
+        this.logger.debug("BUILDING " + this.tokenName);
+        switch (t.getType()) {
+            case JdbcGrammarParser.INTEGERPARAM:
+                this.refObject = new StringLiteral(t.getChild(0)
+                        .getText());
+                break;
+            case JdbcGrammarParser.STRINGLIT:
+                this.refObject = new StringLiteral(t.getChild(0)
+                        .getText(), true);
+                break;
+            case JdbcGrammarParser.COLUMN:
+                this.refObject = new ColumnReference(t, builder,
+                        this.selectStatement,this);
+                break;
+            case JdbcGrammarParser.FUNCTIONCALL:
+                this.refObject = new FunctionCall(t, builder,
+                        this.selectStatement);
+                break;
+            case JdbcGrammarParser.JOKER:
+                this.refObject = new StringLiteral("*", true);
+                break;
+            default:
+                throw new TreeParsingException(
+                        "Unknown FUNCTIONPARAMETER type");
         }
     }
     
