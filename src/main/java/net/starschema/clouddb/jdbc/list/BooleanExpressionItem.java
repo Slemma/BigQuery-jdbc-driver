@@ -208,13 +208,17 @@ public class BooleanExpressionItem extends Node implements ColumnReferencePlace 
                         break;
                     case JdbcGrammarParser.COMPARISONOPERATOR:
                         this.type = BooleanExpressionItemType.COMPARISON;
-                        StringBuilder sb = new StringBuilder();
-                        for (int j = 0; j < child.getChildCount(); j++) {
-                            sb.append(" ");
-                            sb.append(child.getChild(j).getText());
-                            sb.append(" ");
+                        if (child.getChildCount()>1) {
+                            StringBuilder sb = new StringBuilder();
+                            for (int j = 0; j < child.getChildCount(); j++) {
+                                sb.append(" ");
+                                sb.append(child.getChild(j).getText());
+                                sb.append(" ");
+                            }
+                            this.comparisonOperator = sb.toString().trim();
+                        } else {
+                            this.comparisonOperator = child.getChild(0).getText();
                         }
-                        this.comparisonOperator = sb.toString();
                         break;
                     default:
                         break;
@@ -260,7 +264,7 @@ public class BooleanExpressionItem extends Node implements ColumnReferencePlace 
         switch (this.type) {
             case COMPARISON:
                 System.err.println(left.tokenName + " " + right.tokenName);
-                return this.left.toPrettyString() + this.comparisonOperator + this.right.toPrettyString();
+                return this.left.toPrettyString() + " " + this.comparisonOperator +" "+ this.right.toPrettyString();
             case LIKEEXPRESSION:
                 return this.left.toPrettyString() + " LIKE " + this.right.toPrettyString();
             case INEXPRESSION:

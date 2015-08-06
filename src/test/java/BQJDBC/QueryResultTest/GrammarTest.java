@@ -123,6 +123,53 @@ public class GrammarTest {
             Assert.fail("SQLException" + e.toString());
         }
         Assert.assertNotNull(queryResult);
+        int rc = HelperFunctions.printer(queryResult);
+        Assert.assertNotEquals(rc, 0);
+    }
+
+    @Test
+    public void twoTableWithWhere2() {
+
+        input = "SELECT a.corpus_date FROM publicdata:samples.shakespeare a, publicdata:samples.shakespeare b WHERE (a.corpus_date = b.corpus_date) and a.corpus_date in (1590) LIMIT 10;";
+
+        logger.info("Running test: twoTableWithWhere \r\n" + input );
+
+        ResultSet queryResult = null;
+        try {
+            queryResult = con.createStatement().executeQuery(input);
+        }
+        catch (SQLException e) {
+            this.logger.error("SQLexception" + e.toString());
+            Assert.fail("SQLException" + e.toString());
+        }
+        Assert.assertNotNull(queryResult);
+        int rc = HelperFunctions.printer(queryResult);
+        Assert.assertNotEquals(rc, 0);
+    }
+
+    /**
+     * to test the Joinresolver with 2 where clause
+     */
+    @Test
+    public void twoTableWithMultipleWhere() {
+
+        input = "SELECT years.year as c0, SUM(fact_t.weight_pounds) as m0 " +
+                "FROM " +
+                "   (SELECT year FROM publicdata:samples.natality GROUP BY year) as years" +
+                ",  (SELECT weight_pounds, state, year, gestation_weeks FROM publicdata:samples.natality ORDER BY weight_pounds DESC LIMIT 10) as fact_t"+
+                " WHERE " +
+                "fact_t.year = years.year AND years.year in (2008) GROUP BY c0";
+        logger.info("Running test: twoTableWithMultipleWhere \r\n" + input );
+
+        ResultSet queryResult = null;
+        try {
+            queryResult = con.createStatement().executeQuery(input);
+        }
+        catch (SQLException e) {
+            this.logger.error("SQLexception" + e.toString());
+            Assert.fail("SQLException" + e.toString());
+        }
+        Assert.assertNotNull(queryResult);
         HelperFunctions.printer(queryResult);
     }
 
@@ -147,16 +194,16 @@ public class GrammarTest {
                 "      GROUP BY date_id, year, month, day) AS calendar\n" +
                 "      , (SELECT\n" +
                 "            TIMESTAMP(DATE(\n" +
-                "                          repository_created_at)) AS fact_date_id,\n" +
+                "                          repository_created_at)) AS repository_created_at,\n" +
                 "            repository_url,\n" +
                 "            repository_forks,\n" +
                 "            repository_open_issues\n" +
                 "          FROM\n" +
                 "            publicdata:samples.github_timeline) AS fact_t\n" +
-                "WHERE fact_t.fact_date_id = calendar.date_id\n" +
+                "WHERE fact_t.repository_created_at = calendar.date_id\n" +
                 "GROUP BY c0, c1, c2";
 
-        logger.info("Running test: twoTableWithWhere \r\n" + input );
+        logger.info("Running test: joinTwoTablesInSubQuery \r\n" + input );
 
         ResultSet queryResult = null;
         try {
@@ -167,7 +214,39 @@ public class GrammarTest {
             Assert.fail("SQLException" + e.toString());
         }
         Assert.assertNotNull(queryResult);
-        HelperFunctions.printer(queryResult);
+        int rc = HelperFunctions.printer(queryResult);
+        Assert.assertNotEquals(rc, 0);
+    }
+
+    @Test
+    public void joinTwoTablesInSubQuery2() {
+
+        input = "select calendar.year as c0, calendar.month as c1, calendar.day as c2, sum(fact_t.repository_forks) as m0 from (SELECT\n" +
+                "TIMESTAMP(DATE(repository_created_at)) as date_id\n" +
+                ", YEAR(repository_created_at) as year\n" +
+                ", MONTH(repository_created_at) as month\n" +
+                ", STRFTIME_UTC_USEC(repository_created_at,'%Y-%m') as month_name\n" +
+                ", DAY(repository_created_at) as day\n" +
+                ", STRFTIME_UTC_USEC(repository_created_at,'%Y-%m-%d') as day_name\n" +
+                "FROM publicdata:samples.github_timeline\n" +
+                "GROUP BY date_id,year, month, month_name, day, day_name) as calendar, (SELECT\n" +
+                "    TIMESTAMP(DATE(repository_created_at)) as repository_created_at, repository_url, repository_forks, repository_open_issues\n" +
+                "FROM\n" +
+                "    publicdata:samples.github_timeline) as fact_t where fact_t.repository_created_at = calendar.date_id and calendar.year in (2007, 2008, 2009, 2010, 2011, 2012) group by c0, c1, c2\n";
+
+        logger.info("Running test: joinTwoTablesInSubQuery2 \r\n" + input );
+
+        ResultSet queryResult = null;
+        try {
+            queryResult = con.createStatement().executeQuery(input);
+        }
+        catch (SQLException e) {
+            this.logger.error("SQLexception" + e.toString());
+            Assert.fail("SQLException" + e.toString());
+        }
+        Assert.assertNotNull(queryResult);
+        int rc = HelperFunctions.printer(queryResult);
+        Assert.assertNotEquals(rc, 0);
     }
 
 //    /**
@@ -332,32 +411,6 @@ public class GrammarTest {
 
         input = "SELECT weight_pounds FROM publicdata:samples.natality WHERE year in (2006,2007,2008) ORDER BY weight_pounds DESC LIMIT 10";
         logger.info("Running test: testIn \r\n" + input );
-
-        ResultSet queryResult = null;
-        try {
-            queryResult = con.createStatement().executeQuery(input);
-        }
-        catch (SQLException e) {
-            this.logger.error("SQLexception" + e.toString());
-            Assert.fail("SQLException" + e.toString());
-        }
-        Assert.assertNotNull(queryResult);
-        HelperFunctions.printer(queryResult);
-    }
-
-    /**
-     * to test the Joinresolver with 2 where clause
-     */
-    @Test
-    public void twoTableWithMultipleWhere() {
-
-        input = "SELECT years.year as c0, SUM(fact_t.weight_pounds) as m0 " +
-                "FROM " +
-                "   (SELECT year FROM publicdata:samples.natality GROUP BY year) as years" +
-                ",  (SELECT weight_pounds, state, year, gestation_weeks FROM publicdata:samples.natality ORDER BY weight_pounds DESC LIMIT 10) as fact_t"+
-                " WHERE " +
-                "fact_t.year = years.year AND years.year in (2008) GROUP BY c0";
-        logger.info("Running test: twoTableWithMultipleWhere \r\n" + input );
 
         ResultSet queryResult = null;
         try {

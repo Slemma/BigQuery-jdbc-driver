@@ -12,8 +12,11 @@ public class HelperFunctions {
      * Prints a ResultSet QueryResult to Log
      * 
      * @param input
+     * @return int
+     *  Retrun printed rows count
      */
-    public static void printer(ResultSet input) {
+    public static int printer(ResultSet input) {
+        int limit = 50;
         String columnnames = "";
         try {
             for (int i = 1; i <= input.getMetaData().getColumnCount(); i++) {
@@ -26,7 +29,6 @@ public class HelperFunctions {
         logger.debug(columnnames);
         try {
             int columnCount = input.getMetaData().getColumnCount();
-            int limit = 50;
             while (input.next() && limit > 0) {
                 String Output = "";
                 for (int i = 0; i < columnCount; i++) {
@@ -34,13 +36,14 @@ public class HelperFunctions {
                 }
                 logger.debug(Output);
                 limit--;
-            }             
+            }
         }
         catch (SQLException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
             logger.warn("failed: ",e);
         }
+        return 50-limit;
     }
     
     /**
