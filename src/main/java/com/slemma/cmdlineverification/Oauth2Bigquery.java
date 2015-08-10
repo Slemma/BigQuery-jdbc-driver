@@ -117,7 +117,8 @@ public class Oauth2Bigquery {
      * @return Authorized bigquery Connection
      * @throws SQLException
      */
-    public static Bigquery authorizeviainstalled(String clientid,
+    public static Bigquery authorizeviainstalled(String applicationName,
+                                                 String clientid,
                                                  String clientsecret,
                                                  String refreshToken) throws SQLException, IOException {
         List<String> Scopes = new ArrayList<String>();
@@ -133,8 +134,11 @@ public class Oauth2Bigquery {
             throw new SQLException(e);
         }
         logger.debug("Creating a new bigquery client.");
-        Bigquery bigquery = new Builder(CmdlineUtils.getHttpTransport(),
-                CmdlineUtils.getJsonFactory(), credential).build();
+        Bigquery bigquery = new Builder(
+                CmdlineUtils.getHttpTransport(),
+                CmdlineUtils.getJsonFactory(),
+                credential
+        ).setApplicationName(applicationName).build();
         Oauth2Bigquery.servicepath = bigquery.getServicePath();
         return bigquery;
     }
@@ -149,7 +153,8 @@ public class Oauth2Bigquery {
      * @throws GeneralSecurityException
      * @throws IOException
      */
-    public static Bigquery authorizeviaservice(String serviceaccountemail,
+    public static Bigquery authorizeviaservice(String applicationName,
+                                               String serviceaccountemail,
                                                String keypath) throws GeneralSecurityException, IOException {
         List<String> scopes = new ArrayList<String>();
         scopes.add(BigqueryScopes.BIGQUERY);
@@ -165,8 +170,11 @@ public class Oauth2Bigquery {
                 .setServiceAccountPrivateKeyFromP12File(new File(keypath))
                 .build();
 
-        Bigquery bigquery = new Builder(CmdlineUtils.getHttpTransport(),
-                CmdlineUtils.getJsonFactory(), credential).build();
+        Bigquery bigquery = new Builder(
+                CmdlineUtils.getHttpTransport()
+                , CmdlineUtils.getJsonFactory()
+                , credential
+        ).setApplicationName(applicationName).build();
         Oauth2Bigquery.servicepath = bigquery.getServicePath();
         return bigquery;
     }

@@ -206,6 +206,11 @@ public class BQDriver implements java.sql.Driver {
         type.choices = new String[]{"installed", "service"};
         type.description = "Authorization type";
 
+        DriverPropertyInfo applicationName =
+                new DriverPropertyInfo("applicationName", info.getProperty("applicationName"));
+        applicationName.required = false;
+        applicationName.description = "The application name";
+
         DriverPropertyInfo user =
                 new DriverPropertyInfo("user", info.getProperty("user"));
         user.required = true;

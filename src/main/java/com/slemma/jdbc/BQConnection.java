@@ -95,6 +95,10 @@ public class BQConnection implements Connection {
      */
     private final boolean publicDataEnabled;
 
+    /**
+     * The application name
+     */
+    private final String applicationName;
 
     public String  getType(){
         return this.type;
@@ -111,6 +115,10 @@ public class BQConnection implements Connection {
 
     public boolean getPublicDataEnabled(){
         return publicDataEnabled;
+    }
+
+    public String getApplicationName(){
+        return applicationName;
     }
 
     /** List to contain sql warnings in */
@@ -157,6 +165,12 @@ public class BQConnection implements Connection {
         else {
             this.publicDataEnabled = true;
         }
+        if (info.getProperty("applicationName")!=null){
+            this.applicationName = info.getProperty("applicationName");
+        }
+        else {
+            this.applicationName = "Google Big Query jdbc driver";
+        }
         this.projectId = info.getProperty("projectid");
 
         String userId = info.getProperty("user");
@@ -170,7 +184,7 @@ public class BQConnection implements Connection {
         //do we have a serviceaccount to connect with?
         if(type.equals("service")){
             try {
-                this.bigquery = Oauth2Bigquery.authorizeviaservice(userId, userKey);
+                this.bigquery = Oauth2Bigquery.authorizeviaservice(this.getApplicationName(), userId, userKey);
                 this.logger.info("Authorized with service account");
             }
             catch (GeneralSecurityException e) {
@@ -183,7 +197,7 @@ public class BQConnection implements Connection {
         //let use Oauth
         else {
             try {
-                this.bigquery = Oauth2Bigquery.authorizeviainstalled(userId,userKey,refreshToken);
+                this.bigquery = Oauth2Bigquery.authorizeviainstalled(this.getApplicationName(),userId,userKey,refreshToken);
                 this.logger.info("Authorized with Oauth");
             }
             catch (IOException e) {
