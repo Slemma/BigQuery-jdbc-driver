@@ -25,6 +25,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.math.BigDecimal;
+import java.util.Map;
 
 import com.google.api.services.bigquery.model.GetQueryResultsResponse;
 import com.google.api.services.bigquery.model.TableRow;
@@ -237,5 +238,19 @@ public class BQResultSet extends ScrollableResultset<Object> implements
                 return result;
             }
         }
+    }
+
+    //------------------------- for Jdk1.7 -----------------------------------
+
+    /** {@inheritDoc} */
+    @Override
+    public <T> T getObject(int columnIndex, Class<T> type) throws SQLException {
+        return null;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public <T> T getObject(String columnLabel, Class<T> type) throws SQLException {
+        return null;
     }
 }

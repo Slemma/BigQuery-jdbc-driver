@@ -140,5 +140,17 @@ public class BQStatement extends BQStatementRoot implements java.sql.Statement {
         throw new BQSQLException(
                 "Query run took more than the specified timeout");
     }
-    
+
+    //------------------------- for Jdk1.7 -----------------------------------
+
+
+    @Override
+    public void closeOnCompletion() throws SQLException {
+
+    }
+
+    @Override
+    public boolean isCloseOnCompletion() throws SQLException {
+        return false;
+    }
 }

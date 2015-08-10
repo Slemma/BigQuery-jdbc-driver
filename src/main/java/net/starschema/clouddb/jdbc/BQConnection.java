@@ -41,9 +41,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.Executor;
+
 import net.starschema.clouddb.cmdlineverification.Oauth2Bigquery;
 import org.apache.log4j.Logger;
 import com.google.api.services.bigquery.Bigquery;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 /**
  * The connection class which builds the connection between BigQuery and the
@@ -927,5 +930,54 @@ public class BQConnection implements Connection {
     public <T> T unwrap(Class<T> arg0) throws SQLException {
         throw new BQSQLException("Not found");
     }
-    
+
+    //------------------------- for Jdk1.7 -----------------------------------
+
+    @Override
+    public void setNetworkTimeout(Executor executor, int milliseconds) throws SQLException {
+        throw new NotImplementedException();
+    }
+
+    @Override
+    public int getNetworkTimeout() throws SQLException {
+        throw new NotImplementedException();
+    }
+
+    public class AbortCommand implements Runnable
+    {
+        public void run()
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    @Override
+    public void abort(Executor executor) throws SQLException {
+        if (isClosed())
+        {
+            return;
+        }
+
+        //SQL_PERMISSION_ABORT.checkGuard(this);
+
+        AbortCommand command = new AbortCommand();
+        if (executor != null)
+        {
+            executor.execute(command);
+        }
+        else
+        {
+            command.run();
+        }
+    }
+
+    @Override
+    public String getSchema() throws SQLException {
+        return null;
+    }
+
+    @Override
+    public void setSchema(String schema) throws SQLException {
+
+    }
 }

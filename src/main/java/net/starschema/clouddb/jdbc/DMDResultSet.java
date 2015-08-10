@@ -34,7 +34,7 @@ import org.apache.log4j.Logger;
  * this class implements the java.sql.ResultSetMetaData interface for usage in
  * Resultsets which was made from DatabaseMetadata
  * 
- * @author Horváth Attila
+ * @author Horvï¿½th Attila
  * 
  */
 class COLResultSetMetadata implements java.sql.ResultSetMetaData {
@@ -410,7 +410,7 @@ class COLResultSetMetadata implements java.sql.ResultSetMetaData {
  * Object[][] types instead of GetQueryResultsResponse.getrows() for giving back
  * Resultset Data from BQDatabaseMetadata
  * 
- * @author Horváth Attila
+ * @author Horvï¿½th Attila
  * 
  */
 public class DMDResultSet extends ScrollableResultset<Object> implements
@@ -639,5 +639,19 @@ public class DMDResultSet extends ScrollableResultset<Object> implements
                 }
             }
         }
+    }
+
+    //------------------------- for Jdk1.7 -----------------------------------
+
+    /** {@inheritDoc} */
+    @Override
+    public <T> T getObject(int columnIndex, Class<T> type) throws SQLException {
+        return null;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public <T> T getObject(String columnLabel, Class<T> type) throws SQLException {
+        return null;
     }
 }

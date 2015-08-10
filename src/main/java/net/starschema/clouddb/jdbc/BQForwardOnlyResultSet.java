@@ -2683,4 +2683,17 @@ public class BQForwardOnlyResultSet implements java.sql.ResultSet {
         return this.wasnull;
     }
 
+    //------------------------- for Jdk1.7 -----------------------------------
+
+    /** {@inheritDoc} */
+    @Override
+    public <T> T getObject(int columnIndex, Class<T> type) throws SQLException {
+        return null;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public <T> T getObject(String columnLabel, Class<T> type) throws SQLException {
+        return null;
+    }
 }

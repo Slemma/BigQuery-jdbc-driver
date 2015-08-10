@@ -3055,4 +3055,19 @@ class BQDatabaseMetadata implements DatabaseMetaData {
     public boolean usesLocalFiles() throws SQLException {
         return false;
     }
+
+    //------------------------- for Jdk1.7 -----------------------------------
+
+    /** {@inheritDoc} */
+    @Override
+    public boolean generatedKeyAlwaysReturned() throws SQLException {
+        return false;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public ResultSet getPseudoColumns(String catalog, String schemaPattern, String tableNamePattern, String columnNamePattern) throws SQLException {
+        return null;
+    }
+
 }

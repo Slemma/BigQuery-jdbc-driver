@@ -52,10 +52,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.DriverPropertyInfo;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
@@ -406,5 +403,13 @@ public class BQDriver implements java.sql.Driver {
 
     public String property(String Name) {
         return _Props.getProperty(Name);
+    }
+
+    //------------------------- for Jdk1.7 -----------------------------------
+
+    /** {@inheritDoc} */
+    @Override
+    public java.util.logging.Logger getParentLogger() throws SQLFeatureNotSupportedException {
+        return null;
     }
 }

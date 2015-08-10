@@ -49,7 +49,7 @@ import com.google.api.services.bigquery.model.Job;
 /**
  * This class implements java.sql.PreparedStatement
  * 
- * @author Horváth Attila
+ * @author Horvï¿½th Attila
  * @author Balazs Gunics
  * 
  */
@@ -1112,5 +1112,19 @@ public class BQPreparedStatement extends BQStatementRoot implements
             this.SetParameter(parameterIndex, "\"" + x.toString() + "\"");
         }
         
+    }
+
+    //------------------------- for Jdk1.7 -----------------------------------
+
+    /** {@inheritDoc} */
+    @Override
+    public void closeOnCompletion() throws SQLException {
+
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public boolean isCloseOnCompletion() throws SQLException {
+        return false;
     }
 }
