@@ -1,8 +1,8 @@
 package BQJDBC.QueryResultTest;
 
 
-import net.starschema.clouddb.jdbc.JdbcGrammarLexer;
-import net.starschema.clouddb.jdbc.JdbcGrammarParser;
+import com.slemma.jdbc.JdbcGrammarLexer;
+import com.slemma.jdbc.JdbcGrammarParser;
 
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CharStream;

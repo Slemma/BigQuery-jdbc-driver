@@ -6,7 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Properties;
 
-import net.starschema.clouddb.jdbc.BQSupportFuncts;
+import com.slemma.jdbc.BQSupportFuncts;
 
 import org.apache.log4j.Logger;
 import org.junit.Assert;
@@ -33,7 +33,7 @@ public class GrammarTest {
         try {
             if (con == null || !con.isValid(0)) {
                 try {
-                    Class.forName("net.starschema.clouddb.jdbc.BQDriver");
+                    Class.forName("com.slemma.jdbc.BQDriver");
 
                     Properties properties = BQSupportFuncts.readFromPropFile("installedaccount.properties");
                     properties.setProperty("transformQuery","true");

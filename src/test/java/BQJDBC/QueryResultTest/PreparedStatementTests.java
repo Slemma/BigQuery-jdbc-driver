@@ -34,8 +34,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Properties;
 
-import net.starschema.clouddb.jdbc.BQSupportFuncts;
-import net.starschema.clouddb.jdbc.BQSupportMethods;
+import com.slemma.jdbc.BQSupportFuncts;
+import com.slemma.jdbc.BQSupportMethods;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -80,7 +80,7 @@ public class PreparedStatementTests {
     @Before
     public void Connect() throws Exception {
         try {
-            Class.forName("net.starschema.clouddb.jdbc.BQDriver");
+            Class.forName("com.slemma.jdbc.BQDriver");
 
             Properties properties = BQSupportFuncts.readFromPropFile("installedaccount.properties");
             properties.setProperty("transformQuery","fasle");

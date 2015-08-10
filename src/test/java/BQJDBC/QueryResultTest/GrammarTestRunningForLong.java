@@ -1,18 +1,8 @@
 package BQJDBC.QueryResultTest;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.Properties;
-
-import org.junit.Assert;
-import net.starschema.clouddb.jdbc.BQSupportFuncts;
 
 import org.apache.log4j.Logger;
-import org.junit.Before;
-import org.junit.Test;
 
 public class GrammarTestRunningForLong {
     /** String for System independent newline */
@@ -34,7 +24,7 @@ public class GrammarTestRunningForLong {
 //        try {
 //            if (con == null || !con.isValid(0)) {
 //                try {
-//                    Class.forName("net.starschema.clouddb.jdbc.BQDriver");
+//                    Class.forName("com.slemma.jdbc.BQDriver");
 //
 //                    Properties properties = BQSupportFuncts.readFromPropFile("installedaccount.properties");
 //                    properties.setProperty("transformQuery","true");

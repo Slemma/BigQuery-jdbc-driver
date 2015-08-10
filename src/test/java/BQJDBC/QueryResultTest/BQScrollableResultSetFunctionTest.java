@@ -23,10 +23,9 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
 
-//import net.starschema.clouddb.bqjdbc.logging.Logger;
-import net.starschema.clouddb.jdbc.BQConnection;
-import net.starschema.clouddb.jdbc.BQSupportFuncts;
-import net.starschema.clouddb.jdbc.BQSupportMethods;
+import com.slemma.jdbc.BQConnection;
+import com.slemma.jdbc.BQSupportFuncts;
+import com.slemma.jdbc.BQSupportMethods;
 
 import org.apache.log4j.Logger;
 import org.junit.Assert;
@@ -277,7 +276,7 @@ public class BQScrollableResultSetFunctionTest {
                     || !BQScrollableResultSetFunctionTest.con.isValid(0)) {
                 this.logger.info("Testing the JDBC driver");
                 try {
-                    Class.forName("net.starschema.clouddb.jdbc.BQDriver");
+                    Class.forName("com.slemma.jdbc.BQDriver");
 
                     Properties properties = BQSupportFuncts.readFromPropFile("installedaccount.properties");
                     properties.setProperty("transformQuery","false");
