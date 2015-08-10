@@ -49,6 +49,7 @@ import com.google.api.services.bigquery.model.TableList.Tables;
  * 
  */
 public class BQSupportFuncts {
+    /** Google public data project ID */
     static final String PUBLIC_PROJECT_ID = "publicdata";
 
     /** log4j.Logger instance */
@@ -486,15 +487,16 @@ public class BQSupportFuncts {
                 "connection");
 
         List<String> projectIds = new ArrayList<String>();
-        if (catalog == null || !catalog.equalsIgnoreCase(PUBLIC_PROJECT_ID)) {
+
+        if (catalog != null) {
+            projectIds.add(catalog);
+        } else {
             //getting the projects for this connection
             List<Projects> projects = BQSupportFuncts.getCatalogs(catalog,
                     connection);
             for (Projects proj : projects) {
                 projectIds.add(proj.getId());
             }
-        } else {
-            projectIds.add(PUBLIC_PROJECT_ID);
         }
 
         if (projectIds.size() != 0) {

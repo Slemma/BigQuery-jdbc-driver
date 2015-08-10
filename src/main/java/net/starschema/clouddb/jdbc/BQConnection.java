@@ -90,6 +90,12 @@ public class BQConnection implements Connection {
      */
     private final boolean largeJoinsEnabled;
 
+    /**
+     * If true then metadata do not retrieved for publicdata
+     */
+    private final boolean publicDataEnabled;
+
+
     public String  getType(){
         return this.type;
     }
@@ -101,6 +107,10 @@ public class BQConnection implements Connection {
 
     public boolean getLargeJoinsEnabled(){
         return largeJoinsEnabled;
+    }
+
+    public boolean getPublicDataEnabled(){
+        return publicDataEnabled;
     }
 
     /** List to contain sql warnings in */
@@ -140,6 +150,12 @@ public class BQConnection implements Connection {
         }
         else {
             this.largeJoinsEnabled = true;
+        }
+        if (info.getProperty("disablePublicData")!=null){
+            this.publicDataEnabled = Boolean.parseBoolean(info.getProperty("publicDataEnabled"));
+        }
+        else {
+            this.publicDataEnabled = true;
         }
         this.projectId = info.getProperty("projectid");
 

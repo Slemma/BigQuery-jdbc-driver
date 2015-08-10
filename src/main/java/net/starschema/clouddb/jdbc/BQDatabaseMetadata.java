@@ -286,14 +286,20 @@ class BQDatabaseMetadata implements DatabaseMetaData {
                     .list().execute().getProjects();
             
             if (Projects != null && Projects.size() != 0) {
-                String[] Data = new String[Projects.size()];
+                List<String> data = new ArrayList<String>(0);
                 String toLog = "";
                 for (int i = 0; i < Projects.size(); i++) {
-                    Data[i] = Projects.get(i).getId().replace(":", "__").replace(".","_");
-                    toLog += Data[i] + " , ";
+                    String projectId = Projects.get(i).getId().replace(":", "__").replace(".","_");
+                    data.add(projectId);
+                    toLog += projectId + " , ";
+                }
+                if (this.Connection.getPublicDataEnabled()) {
+                    String projectId = BQSupportFuncts.PUBLIC_PROJECT_ID;
+                    data.add(projectId);
+                    toLog += projectId + " , ";
                 }
                 logger.debug("Catalogs are: " + toLog);
-                return new DMDResultSet(Data, new String[] { "TABLE_CAT" },
+                return new DMDResultSet(data.toArray(), new String[] { "TABLE_CAT" },
                         DMDResultSetType.getCatalogs);
             }
             else {
