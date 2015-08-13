@@ -97,7 +97,7 @@ public class BQStatement extends BQStatementRoot implements java.sql.Statement {
             this.logger.debug("Executing Query: " + querySql);
         }
         catch (IOException e) {
-            throw new BQSQLException("Something went wrong with the query: " + querySql,e);
+            throw new BQSQLException("Something went wrong with the query:\n" + querySql,e);
         }
         try {
             do {
@@ -130,7 +130,7 @@ public class BQStatement extends BQStatementRoot implements java.sql.Statement {
             // it runs for a minimum of 1 time
         }
         catch (IOException e) {
-            throw new BQSQLException("Something went wrong with the query: " + querySql,e);
+            throw new BQSQLException("Something went wrong with the query:\n" + querySql,e);
         }
         catch (InterruptedException e) {
             e.printStackTrace();

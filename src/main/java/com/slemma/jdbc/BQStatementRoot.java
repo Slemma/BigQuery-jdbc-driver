@@ -243,7 +243,7 @@ public abstract class BQStatementRoot {
             this.logger.info("Executing Query: " + querySql);
         }
         catch (IOException e) {
-            throw new BQSQLException("Something went wrong with the query: " + querySql,e);
+            throw new BQSQLException("Something went wrong with the query:\n" + querySql,e);
         }
         try {
             do {
@@ -274,7 +274,7 @@ public abstract class BQStatementRoot {
             // it runs for a minimum of 1 time
         }
         catch (IOException e) {            
-            throw new BQSQLException("Something went wrong with the query: " + querySql,e);
+            throw new BQSQLException("Something went wrong with the query:\n" + querySql,e);
         }
         catch (InterruptedException e) {
             e.printStackTrace();

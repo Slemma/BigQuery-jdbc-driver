@@ -238,13 +238,6 @@ public class BQDriver implements java.sql.Driver {
         largeJoinsEnabled.choices = new String[]{"true", "false"};
         largeJoinsEnabled.description = "Should the driver use EACH operator in JOINs";
 
-        DriverPropertyInfo publicDataEnabled =
-                new DriverPropertyInfo("publicDataEnabled", info.getProperty("publicDataEnabled", "false"));
-        publicDataEnabled.required = false;
-        publicDataEnabled.choices = new String[]{"true", "false"};
-        publicDataEnabled.description = "If true then metadata do not retrieved for publicdata";
-
-
         DriverPropertyInfo[] Dpi = {
                 projectID,
                 type,
@@ -252,8 +245,7 @@ public class BQDriver implements java.sql.Driver {
                 password,
                 refreshToken,
                 transformQuery,
-                largeJoinsEnabled,
-                publicDataEnabled
+                largeJoinsEnabled
         };
         return Dpi;
     }

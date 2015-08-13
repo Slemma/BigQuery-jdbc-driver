@@ -486,16 +486,17 @@ public class BQSupportFuncts {
 
         List<String> projectIds = new ArrayList<String>();
 
-        if (catalog != null) {
-            projectIds.add(catalog);
-        } else {
+        if (catalog == null) {
             //getting the projects for this connection
             List<Projects> projects = BQSupportFuncts.getCatalogs(catalog,
                     connection);
             for (Projects proj : projects) {
                 projectIds.add(proj.getId());
             }
+        } else {
+            projectIds.add(catalog);
         }
+
 
         if (projectIds.size() != 0) {
             for (String projId : projectIds) {

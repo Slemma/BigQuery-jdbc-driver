@@ -260,7 +260,7 @@ public class BQPreparedStatement extends BQStatementRoot implements
             this.logger.info("Executing Query: " + this.RunnableStatement);
         }
         catch (IOException e) {
-            throw new BQSQLException("Something went wrong with the query: " + this.RunnableStatement,e);
+            throw new BQSQLException("Something went wrong with the query:\n" + this.RunnableStatement,e);
         }
         try {
             do {
@@ -293,7 +293,7 @@ public class BQPreparedStatement extends BQStatementRoot implements
             // it runs for a minimum of 1 time
         }
         catch (IOException e) {
-            throw new BQSQLException("Something went wrong with the query: " + this.RunnableStatement,e);
+            throw new BQSQLException("Something went wrong with the query:\n" + this.RunnableStatement,e);
         }
         catch (InterruptedException e) {
             e.printStackTrace();
