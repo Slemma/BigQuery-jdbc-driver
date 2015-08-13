@@ -372,6 +372,31 @@ public class BQDriver implements java.sql.Driver {
         if (st.hasMoreTokens()) {
             String project_id = st.nextToken();
             if (project_id != null) {
+
+                if (project_id.equals("/")) {
+                    if (st.hasMoreTokens()) {
+                        project_id = st.nextToken();
+                        if (project_id != null) {
+                            if (project_id.equals("/")) {
+                                if (st.hasMoreTokens()) {
+                                    project_id = st.nextToken();
+                                    if (project_id==null) {
+                                        return null;
+                                    }
+                                } else {
+                                    return null;
+                                }
+                            } else {
+                                return null;
+                            }
+                        } else {
+                            return null;
+                        }
+                    } else {
+                        return null;
+                    }
+                }
+
                 urlProps.put("projectid", project_id);
 
                 // We're done
