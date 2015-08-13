@@ -195,17 +195,17 @@ public class SourceTable extends Node {
     @Override
     public String toPrettyString(int level) {
         String result = "";
-        result += this.tab(level);
-        if (this.project != null) {            
+        if (this.project != null) {
             result += getProjectDecoded() + ":";
         }
         if (this.dataset != null) {
             result += this.dataset + ".";
         }
         result += this.name;
+        result =  "[" + result + "]";
         if (this.alias != null) {
             result += " AS " + this.alias;
         }
-        return result;
+        return this.tab(level) + result;
     }
 }
