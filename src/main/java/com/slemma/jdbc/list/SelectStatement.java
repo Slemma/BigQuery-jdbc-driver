@@ -58,6 +58,7 @@ public class SelectStatement extends Node {
     /** if this Select Statement is in a SubQuery 
      * we store its parent as a Subquery*/
     SubQuery parent = null;
+    boolean isDistinct=false;
     
     /** Returns a SubQuery if this selectStatement
      *  is in a SubQuery, or null if it isn't 
@@ -230,7 +231,14 @@ public class SelectStatement extends Node {
                 this.whereExpression = null;
                 }
             }
-            
+
+            for (int i = 0; i < t.getChildCount(); i++) {
+                Tree child = t.getChild(i);
+                if (child.getType()==JdbcGrammarParser.DISTINCT){
+                    this.isDistinct = true;
+                    break;
+                }
+            }
             // After we take care for EXPRESSION
             for (int i = 0; i < t.getChildCount(); i++) {
                 Tree child = t.getChild(i);
@@ -335,6 +343,13 @@ public class SelectStatement extends Node {
         }
         if (this.groupByExpression != null) {
             result += newline + this.groupByExpression.toPrettyString(level);
+        } else if (this.isDistinct) {  //workaround for distinct statements  TODO: fix needed
+            String groupBY = "";
+            for (Node node : this.expression.children) {
+                groupBY += ((UniQueIdContainer)node).getUniqueid() + ",";
+            }
+            groupBY = groupBY.substring(0, groupBY.length() - 1);
+            result += " GROUP BY " + groupBY;
         }
         if (this.havingExpression != null) {
             result += newline + this.havingExpression.toPrettyString(level);
