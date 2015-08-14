@@ -165,9 +165,15 @@ public class WhereExpressionJoinResolver {
                 subqueries.add(mkJoinExprFrmBooleanExprItem((BooleanExpressionItem)node, selectStatement));
             }
         }
-        
+
+       for(int i=1;i<subqueries.size();i++) {
+          if (subqueries.get(i) == null){
+             return null;
+          }
+       }
+
         SubQuery mainSubQuery = subqueries.get(0);
-        
+
         Expression mainExpression = mainSubQuery.getSelectStatement().getExpression();
         List<ColumnCall> columns2 = mainExpression.getColumns();
         

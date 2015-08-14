@@ -219,9 +219,13 @@ public class SelectStatement extends Node {
                             List<SubQuery> disjunctionAsJoin = 
                                 WhereExpressionJoinResolver.mkJoinExprFrmDisjunction(
                                         (Disjunction)whereExpression.getExpression(), this);
-                            this.fromExpression.children = new LinkedList<Node>();
-                            for (SubQuery subQuery : disjunctionAsJoin) {
-                                this.fromExpression.children.add(subQuery);
+                            if (disjunctionAsJoin == null){
+                                keepWhere = true;
+                            } else {
+                                this.fromExpression.children = new LinkedList<Node>();
+                                for (SubQuery subQuery : disjunctionAsJoin) {
+                                    this.fromExpression.children.add(subQuery);
+                                }
                             }
                         break;
                     default:
