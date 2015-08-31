@@ -46,7 +46,6 @@ import java.util.concurrent.Executor;
 import com.slemma.cmdlineverification.Oauth2Bigquery;
 import org.apache.log4j.Logger;
 import com.google.api.services.bigquery.Bigquery;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 /**
  * The connection class which builds the connection between BigQuery and the
@@ -950,19 +949,19 @@ public class BQConnection implements Connection {
 
     @Override
     public void setNetworkTimeout(Executor executor, int milliseconds) throws SQLException {
-        throw new NotImplementedException();
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public int getNetworkTimeout() throws SQLException {
-        throw new NotImplementedException();
+        throw new UnsupportedOperationException();
     }
 
     public class AbortCommand implements Runnable
     {
         public void run()
         {
-            throw new NotImplementedException();
+            throw new UnsupportedOperationException();
         }
     }
 
