@@ -1,5 +1,9 @@
 package BQJDBC.QueryResultTest;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -8,6 +12,11 @@ import java.util.Properties;
 
 import com.slemma.jdbc.BQSupportFuncts;
 
+import com.slemma.jdbc.JdbcGrammarLexer;
+import com.slemma.jdbc.JdbcGrammarParser;
+import org.antlr.runtime.ANTLRInputStream;
+import org.antlr.runtime.CommonTokenStream;
+import org.antlr.runtime.RecognitionException;
 import org.apache.log4j.Logger;
 import org.junit.Assert;
 import org.junit.Before;
@@ -60,7 +69,7 @@ public class GrammarTest {
      */
     @Test
     public void selectJokerFromSubQueries() {
-        input = "SELECT * FROM (SELECT aa.*, bb.* FROM publicdata:samples.natality aa, publicdata:samples.shakespeare bb) LIMIT 10;";
+        input = "select natality.state as c0, sum(natality.weight_pounds) as m0 from bqtest-1035:samples.natality as natality where (natality.state in ('CT', 'DC', 'DE', 'FL') or natality.state is null) group by c0";
         logger.info("Runing test: select Joker From SubQueries:" + newLine + input);
         ResultSet queryResult = null;
         try {
@@ -107,28 +116,9 @@ public class GrammarTest {
      *  to test the JOINresolver, it should make a JOIN with it's
      *  ONCLAUSE derived by the WHERE clause
      */
+
     @Test
     public void twoTableWithWhere() {
-
-        input = "SELECT a.corpus_date FROM publicdata:samples.shakespeare a, publicdata:samples.shakespeare b WHERE (a.corpus_date = b.corpus_date) LIMIT 10;";
-
-        logger.info("Running test: twoTableWithWhere \r\n" + input );
-
-        ResultSet queryResult = null;
-        try {
-            queryResult = con.createStatement().executeQuery(input);
-        }
-        catch (SQLException e) {
-            this.logger.error("SQLexception" + e.toString());
-            Assert.fail("SQLException" + e.toString());
-        }
-        Assert.assertNotNull(queryResult);
-        int rc = HelperFunctions.printer(queryResult);
-        Assert.assertNotEquals(rc, 0);
-    }
-
-    @Test
-    public void twoTableWithWhere2() {
 
         input = "SELECT a.corpus_date FROM publicdata:samples.shakespeare a, publicdata:samples.shakespeare b WHERE (a.corpus_date = b.corpus_date) and a.corpus_date in (1590) LIMIT 10;";
 
