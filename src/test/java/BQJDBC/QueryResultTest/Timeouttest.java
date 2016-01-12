@@ -117,16 +117,17 @@ public class Timeouttest {
     @Test
     public void QueryResultTest01() {
         final String sql = "SELECT * FROM\n" +
-                "(SELECT 'you' as word, 42 as count)\n" +
-                ",(SELECT 'yet' as word, 42 as count)\n" +
-                ",(SELECT 'would' as word, 42 as count)\n" +
-                ",(SELECT 'world' as word, 42 as count)\n" +
-                ",(SELECT 'without' as word, 42 as count)\n" +
-                ",(SELECT 'with' as word, 42 as count)\n" +
-                ",(SELECT 'your' as word, 41 as count)\n" +
-                ",(SELECT 'young' as word, 41 as count)\n" +
-                ",(SELECT 'words' as word, 41 as count)\n" +
-                ",(SELECT 'word' as word, 41 as count)";
+                "(SELECT 'you' as word, 42 as count, 1 as ord)\n" +
+                ",(SELECT 'yet' as word, 42 as count, 2 as ord)\n" +
+                ",(SELECT 'would' as word, 42 as count, 3 as ord)\n" +
+                ",(SELECT 'world' as word, 42 as count, 4 as ord)\n" +
+                ",(SELECT 'without' as word, 42 as count, 5 as ord)\n" +
+                ",(SELECT 'with' as word, 42 as count, 6 as ord)\n" +
+                ",(SELECT 'your' as word, 41 as count, 7 as ord)\n" +
+                ",(SELECT 'young' as word, 41 as count, 8 as ord)\n" +
+                ",(SELECT 'words' as word, 41 as count, 9 as ord)\n" +
+                ",(SELECT 'word' as word, 41 as count, 10 as ord)" +
+                "ORDER BY ord";
         final String description = "The top 10 word from shakespeare #TOP #COUNT";
         String[][] expectation = new String[][] {
                 {"you", "yet", "would", "world", "without", "with", "your", "young",

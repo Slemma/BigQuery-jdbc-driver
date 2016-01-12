@@ -48,6 +48,8 @@ import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.Map;
 
+import com.google.api.client.googleapis.json.GoogleJsonError;
+import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import org.apache.log4j.Logger;
 
 import com.google.api.services.bigquery.Bigquery;
@@ -119,6 +121,10 @@ public class BQForwardOnlyResultSet implements java.sql.ResultSet {
         try {
             this.Result = BQSupportFuncts.getQueryResultsDivided(bigquery,
                     projectId, completedJob, FETCH_POS, FETCH_SIZE);
+        }
+        catch (GoogleJsonResponseException e) {
+            GoogleJsonError details= e.getDetails();
+            throw new SQLException(details.getMessage(), e);
         }
         catch (IOException e) {
             throw new SQLException("Failed to retrieve data",e);
