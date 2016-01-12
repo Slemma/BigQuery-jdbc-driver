@@ -124,7 +124,7 @@ public class BQForwardOnlyResultSet implements java.sql.ResultSet {
         }
         catch (GoogleJsonResponseException e) {
             GoogleJsonError details= e.getDetails();
-            throw new SQLException(details.getMessage(), e);
+            throw new SQLException(details.getMessage()+"\n [SQL: " + this.Statementreference.toString()+"]", e);
         }
         catch (IOException e) {
             throw new SQLException("Failed to retrieve data",e);

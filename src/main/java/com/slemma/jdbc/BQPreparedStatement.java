@@ -1114,6 +1114,18 @@ public class BQPreparedStatement extends BQStatementRoot implements
         
     }
 
+    @Override
+    public String toString()
+    {
+        if (this.RunnableStatement != null)
+            return this.RunnableStatement;
+
+        if (this.PrecompiledSQL != null)
+            return this.RunnableStatement;
+
+        return super.toString();
+    }
+
     //------------------------- for Jdk1.7 -----------------------------------
 
     /** {@inheritDoc} */
