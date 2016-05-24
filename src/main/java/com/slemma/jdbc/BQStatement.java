@@ -109,12 +109,12 @@ public class BQStatement extends BQStatementRoot implements java.sql.Statement {
                         return new BQScrollableResultSet(BQSupportFuncts.getQueryResults(
                                 this.connection.getBigquery(), 
                                 this.ProjectId.replace("__", ":").replace("_", "."),
-                                referencedJob), this);
+                                referencedJob), this, querySql);
                     } else {
                         return new BQForwardOnlyResultSet(
                                 this.connection.getBigquery(), 
                                 this.ProjectId.replace("__", ":").replace("_", "."),
-                                referencedJob, this);
+                                referencedJob, this, querySql);
                     }
                 }
                 // Pause execution for half second before polling job status

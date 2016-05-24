@@ -45,18 +45,16 @@ import java.sql.SQLXML;
 import java.sql.Statement;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Map;
 
 import com.google.api.client.googleapis.json.GoogleJsonError;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
+import com.google.api.services.bigquery.model.*;
 import org.apache.log4j.Logger;
 
 import com.google.api.services.bigquery.Bigquery;
-import com.google.api.services.bigquery.model.GetQueryResultsResponse;
-import com.google.api.services.bigquery.model.Job;
-import com.google.api.services.bigquery.model.TableRow;
-import com.google.api.services.bigquery.model.TableCell;
 import com.google.api.client.util.Data;
 
 /**
@@ -111,7 +109,8 @@ public class BQForwardOnlyResultSet implements java.sql.ResultSet {
      * @throws SQLException - if we fail to get the results
      */
     public BQForwardOnlyResultSet(Bigquery bigquery, String projectId,
-                                  Job completedJob, BQStatementRoot bqStatementRoot) throws SQLException  {
+                                  Job completedJob, BQStatementRoot bqStatementRoot,
+                                  String sqlString) throws SQLException  {
         logger.debug("Created forward only resultset TYPE_FORWARD_ONLY");
         this.Statementreference = (Statement) bqStatementRoot;
         this.bigquery = bigquery;
@@ -121,6 +120,23 @@ public class BQForwardOnlyResultSet implements java.sql.ResultSet {
         try {
             this.Result = BQSupportFuncts.getQueryResultsDivided(bigquery,
                     projectId, completedJob, FETCH_POS, FETCH_SIZE);
+            //TODO: this is workaround (google SDK replace dot in field names to underscore)
+            if (this.Result.containsKey("schema"))
+            {
+                TableSchema tblSchema = (TableSchema)this.Result.get("schema");
+                ArrayList<TableFieldSchema> fieldsList = (ArrayList<TableFieldSchema>) tblSchema.get("fields");
+                String sqlLowerString = sqlString.toLowerCase();
+                for (TableFieldSchema fieldSchema : fieldsList)
+                {
+                    String fieldName = fieldSchema.getName();
+                    String fieldNameWithDot = fieldName.replace("_", ".");
+                    if (fieldName.contains("_") && sqlLowerString.contains(fieldNameWithDot.toLowerCase()))
+                    {
+                        //try find nested field (with dot) in sql query
+                        fieldSchema.setName(fieldNameWithDot);
+                    }
+                }
+            }
         }
         catch (GoogleJsonResponseException e) {
             GoogleJsonError details= e.getDetails();

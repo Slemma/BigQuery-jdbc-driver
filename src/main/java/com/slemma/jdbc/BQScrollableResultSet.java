@@ -25,10 +25,9 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 
-import com.google.api.services.bigquery.model.GetQueryResultsResponse;
-import com.google.api.services.bigquery.model.TableRow;
-import com.google.api.services.bigquery.model.TableCell;
+import com.google.api.services.bigquery.model.*;
 import com.google.api.client.util.Data;
 
 /**
@@ -88,9 +87,27 @@ public class BQScrollableResultSet extends ScrollableResultset<Object> implement
      * @param bqStatementRoot                Reference of the Statement that creates this Resultset
      */
     public BQScrollableResultSet(GetQueryResultsResponse bigQueryGetQueryResultResponse,
-                                 BQStatementRoot bqStatementRoot) {
+                                 BQStatementRoot bqStatementRoot, String sqlString) {
         logger.debug("Created Scrollable resultset TYPE_SCROLL_INSENSITIVE");
         this.Result = bigQueryGetQueryResultResponse;
+        //TODO: this is workaround (google SDK replace dot in field names to underscore)
+        if (this.Result.containsKey("schema"))
+        {
+            TableSchema tblSchema = (TableSchema)this.Result.get("schema");
+            ArrayList<TableFieldSchema> fieldsList = (ArrayList<TableFieldSchema>) tblSchema.get("fields");
+            String sqlLowerString = sqlString.toLowerCase();
+            for (TableFieldSchema fieldSchema : fieldsList)
+            {
+                String fieldName = fieldSchema.getName();
+                String fieldNameWithDot = fieldName.replace("_", ".");
+                if (fieldName.contains("_") && sqlLowerString.contains(fieldNameWithDot.toLowerCase()))
+                {
+                    //try find nested field (with dot) in sql query
+                    fieldSchema.setName(fieldNameWithDot);
+                }
+            }
+        }
+
         BigInteger maxrow;
         try {
             maxrow = BigInteger.valueOf(bqStatementRoot.getMaxRows());

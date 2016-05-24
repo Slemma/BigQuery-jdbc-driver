@@ -402,6 +402,27 @@ public class BQForwardOnlyResultSetFunctionTest {
         catch (SQLException e) {
             Assert.assertTrue(true);
         }
-    }     
-    
+    }
+
+    @Test
+    public void selectNestedDataset() {
+
+        String input = "SELECT [repository.name], [repository.url],SUM( [repository.size] ) " +
+                "FROM [publicdata.samples.github_nested] " +
+                "GROUP BY [repository.name], [repository.url] limit 10 ";
+        logger.info("Running test: selectNestedDataset \r\n" + input );
+
+        ResultSet queryResult = null;
+        try {
+            queryResult = con.createStatement().executeQuery(input);
+            String firstColumnName  = queryResult.getMetaData().getColumnName(1);
+            Assert.assertEquals("repository.name", firstColumnName);
+        }
+        catch (SQLException e) {
+            this.logger.error("SQLexception" + e.toString());
+            Assert.fail("SQLException" + e.toString());
+        }
+        Assert.assertNotNull(queryResult);
+        HelperFunctions.printer(queryResult);
+    }
 }

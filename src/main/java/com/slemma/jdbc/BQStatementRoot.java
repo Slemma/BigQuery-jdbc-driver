@@ -253,12 +253,12 @@ public abstract class BQStatementRoot {
                     if(resultSetType == ResultSet.TYPE_SCROLL_INSENSITIVE) {
                         return new BQScrollableResultSet(BQSupportFuncts.getQueryResults(
                                 this.connection.getBigquery(), this.ProjectId,
-                                referencedJob), this);
+                                referencedJob), this, querySql);
                     } else {
                         return new BQForwardOnlyResultSet(
                                 this.connection.getBigquery(), 
                                 this.ProjectId.replace("__", ":").replace("_", "."),
-                                referencedJob, this);
+                                referencedJob, this, querySql);
                     }
                 }
                 // Pause execution for half second before polling job status

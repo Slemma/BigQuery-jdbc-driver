@@ -272,12 +272,12 @@ public class BQPreparedStatement extends BQStatementRoot implements
                         return new BQScrollableResultSet(BQSupportFuncts.getQueryResults(
                             this.connection.getBigquery(), 
                             this.ProjectId.replace("__", ":").replace("_", "."),
-                            referencedJob), this);
+                            referencedJob), this, this.RunnableStatement);
                     } else {
                         return new BQForwardOnlyResultSet(
                                 this.connection.getBigquery(), 
                                 this.ProjectId.replace("__", ":").replace("_", "."),
-                                referencedJob, this);
+                                referencedJob, this, this.RunnableStatement);
                     }
                 }
                 // Pause execution for half second before polling job status
