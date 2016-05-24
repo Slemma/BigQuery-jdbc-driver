@@ -100,7 +100,11 @@ public class BQScrollableResultSet extends ScrollableResultset<Object> implement
             {
                 String fieldName = fieldSchema.getName();
                 String fieldNameWithDot = fieldName.replace("_", ".");
-                if (fieldName.contains("_") && sqlLowerString.contains(fieldNameWithDot.toLowerCase()))
+                if (fieldName.contains("_")
+                        && sqlLowerString.contains(fieldNameWithDot.toLowerCase())
+                        && !sqlLowerString.replace(" ", "").replace("[","").replace("]","").contains(fieldNameWithDot.toLowerCase() + "as" + fieldName.toLowerCase()) //check if alias used (level1.level2 as level1_level2)
+                        && !sqlLowerString.replace(" ", "").replace("[","").replace("]","").contains(fieldNameWithDot.toLowerCase() + fieldName.toLowerCase()) //check if alias used (level1.level2 level1_level2)
+                        )
                 {
                     //try find nested field (with dot) in sql query
                     fieldSchema.setName(fieldNameWithDot);

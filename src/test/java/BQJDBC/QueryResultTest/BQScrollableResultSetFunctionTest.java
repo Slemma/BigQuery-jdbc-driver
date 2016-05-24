@@ -721,7 +721,7 @@ public class BQScrollableResultSetFunctionTest {
     }
 
     @Test
-    public void selectNestedDataset() {
+    public void selectNestedDataSet() {
 
         String input = "SELECT [repository.name], [repository.url],SUM( [repository.size] ) " +
                 "FROM [publicdata.samples.github_nested] " +
@@ -733,6 +733,50 @@ public class BQScrollableResultSetFunctionTest {
             queryResult = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY).executeQuery(input);
             String firstColumnName  = queryResult.getMetaData().getColumnName(1);
             Assert.assertEquals("repository.name", firstColumnName);
+        }
+        catch (SQLException e) {
+            this.logger.error("SQLexception" + e.toString());
+            Assert.fail("SQLException" + e.toString());
+        }
+        Assert.assertNotNull(queryResult);
+        HelperFunctions.printer(queryResult);
+    }
+
+    @Test
+    public void selectNestedDataSetAliased1() {
+
+        String input = "SELECT [repository.name] as repository_name, [repository.url], SUM([repository.size]) " +
+                "FROM [publicdata.samples.github_nested] " +
+                "GROUP BY repository_name, [repository.url] limit 10 ";
+        logger.info("Running test: selectNestedDataset \r\n" + input );
+
+        ResultSet queryResult = null;
+        try {
+            queryResult = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY).executeQuery(input);
+            String firstColumnName  = queryResult.getMetaData().getColumnName(1);
+            Assert.assertEquals("repository_name", firstColumnName);
+        }
+        catch (SQLException e) {
+            this.logger.error("SQLexception" + e.toString());
+            Assert.fail("SQLException" + e.toString());
+        }
+        Assert.assertNotNull(queryResult);
+        HelperFunctions.printer(queryResult);
+    }
+
+    @Test
+    public void selectNestedDataSetAliased2() {
+
+        String input = "SELECT [repository.name] repository_name, [repository.url], SUM([repository.size]) " +
+                "FROM [publicdata.samples.github_nested] " +
+                "GROUP BY repository_name, [repository.url] limit 10 ";
+        logger.info("Running test: selectNestedDataset \r\n" + input );
+
+        ResultSet queryResult = null;
+        try {
+            queryResult = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY).executeQuery(input);
+            String firstColumnName  = queryResult.getMetaData().getColumnName(1);
+            Assert.assertEquals("repository_name", firstColumnName);
         }
         catch (SQLException e) {
             this.logger.error("SQLexception" + e.toString());
