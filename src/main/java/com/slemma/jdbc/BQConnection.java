@@ -43,6 +43,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Executor;
 
+import com.google.api.services.bigquery.model.ProjectList;
 import com.slemma.cmdlineverification.Oauth2Bigquery;
 import org.apache.log4j.Logger;
 import com.google.api.services.bigquery.Bigquery;
@@ -188,6 +189,18 @@ public class BQConnection implements Connection {
                 throw new BQSQLException(e);
             }
         }
+
+        try
+        {
+            //verification request
+            Bigquery.Projects.List projectListRequest = bigquery.projects().list();
+            ProjectList projectList = projectListRequest.execute();
+        }
+        catch (IOException e)
+        {
+            throw new BQSQLException(e.getMessage());
+        }
+
         logger.debug("The project id for this connections is: " + this.projectId);
     }
     

@@ -5,7 +5,7 @@
     <artifactId>bqjdbc</artifactId>
     <name>Big Query over JDBC</name>
     <description>A simple JDBC driver, to reach Google's BigQuery</description>
-    <version>1.0.10</version>
+    <version>1.0.11</version>
     <repositories>
         <repository>
             <id>google-api-services</id>
