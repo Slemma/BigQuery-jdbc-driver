@@ -65,15 +65,42 @@ public class DriverTest
         }
     }
 
-//    @Test
-//    public void parseUrlDelimeter1() {
-//        try {
-//            BQDriver drv = (BQDriver)DriverManager.getDriver("jdbc:BQDriver:api-project");
-//            Assert.assertEquals(drv.ProjectId(),"api-project");
-//        }
-//        catch (SQLException e) {
-//
-//        }
-//    }
+    @Test
+    public void parseUrl1() {
+        String url = "jdbc:BQDriver://test.com:test_project";
+        try {
+            BQDriver drv = (BQDriver)DriverManager.getDriver(url);
+            Properties parsedProperties = drv.parseURL(url, new Properties());
+            if (parsedProperties.containsKey("projectid")) {
+                String projectId = (String) parsedProperties.get("projectid");
+                Assert.assertEquals("test.com:test_project", projectId);
+            } else {
+                Assert.fail("Key 'projectId' not found");
+            }
+
+        }
+        catch (SQLException e) {
+            Assert.fail("Fail/ Exception message: " + e.getMessage());
+        }
+    }
+
+    @Test
+    public void parseUrl2() {
+        String url = "jdbc:BQDriver://test.com:test_project?transformQuery=true&qqq=rrr";
+        try {
+            BQDriver drv = (BQDriver)DriverManager.getDriver(url);
+            Properties parsedProperties = drv.parseURL(url, new Properties());
+            if (parsedProperties.containsKey("projectid")) {
+                String projectId = (String) parsedProperties.get("projectid");
+                Assert.assertEquals("test.com:test_project", projectId);
+            } else {
+                Assert.fail("Key 'projectId' not found");
+            }
+
+        }
+        catch (SQLException e) {
+            Assert.fail("Fail/ Exception message: " + e.getMessage());
+        }
+    }
 
 }

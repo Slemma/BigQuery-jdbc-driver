@@ -84,16 +84,6 @@ public class BQQueryParser {
         }
         this.successFullParsing = true;
         // ANTLR Parsing
-        String catalog = "";
-        try {
-            catalog = this.connection.getCatalog();
-            String catalogDecoded = catalog.replace("__", ":").replace("_", ".");
-            //this will replace the catalog
-            queryToParse = queryToParse.replace(catalog, catalogDecoded);
-        }
-        catch (SQLException e2) {
-            logger.warn("failed to replace the catalog in the query, catalog for the connection is: " + catalog);
-        }
         this.logger.debug("The Query before parsing: " + this.queryToParse);
         try {
             TreeBuilder builder = new TreeBuilder(this.queryToParse,

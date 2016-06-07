@@ -45,9 +45,9 @@ public abstract class BQStatementRoot {
     
     /** Reference to store the ran Query run by Executequery or Execute */
     ResultSet resset = null;
-    
+
     /** String containing the context of the Project */
-    String ProjectId = null;
+    protected String projectId = null;
     // Logger logger = new Logger(BQStatementRoot.class.getName());
     Logger logger = Logger.getLogger(BQStatementRoot.class.getName());
     
@@ -84,7 +84,12 @@ public abstract class BQStatementRoot {
      * to be used with setMaxFieldSize
      */
     private int maxFieldSize = 0;
-    
+
+    public String getProjectId()
+    {
+        return projectId;
+    }
+
     /**
      * <p>
      * <h1>Implementation Details:</h1><br>
@@ -239,7 +244,7 @@ public abstract class BQStatementRoot {
         try {
             // Gets the Job reference of the completed job with give Query
             referencedJob = BQSupportFuncts.startQuery(
-                    this.connection.getBigquery(), this.ProjectId, querySql);
+                    this.connection.getBigquery(), this.getProjectId(), querySql);
             this.logger.info("Executing Query: " + querySql);
         }
         catch (IOException e) {
@@ -248,16 +253,16 @@ public abstract class BQStatementRoot {
         try {
             do {
                 if (BQSupportFuncts.getQueryState(referencedJob,
-                        this.connection.getBigquery(), this.ProjectId).equals(
+                        this.connection.getBigquery(), this.getProjectId()).equals(
                         "DONE")) {
                     if(resultSetType == ResultSet.TYPE_SCROLL_INSENSITIVE) {
                         return new BQScrollableResultSet(BQSupportFuncts.getQueryResults(
-                                this.connection.getBigquery(), this.ProjectId,
+                                this.connection.getBigquery(), this.getProjectId(),
                                 referencedJob), this, querySql);
                     } else {
                         return new BQForwardOnlyResultSet(
                                 this.connection.getBigquery(), 
-                                this.ProjectId.replace("__", ":").replace("_", "."),
+                                this.getProjectId(),
                                 referencedJob, this, querySql);
                     }
                 }

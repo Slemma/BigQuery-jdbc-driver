@@ -474,7 +474,7 @@ public class BQConnection implements Connection {
     public String getProjectId() {
         return this.projectId;
     }
-    
+
     /**
      * <p>
      * <h1>Implementation Details:</h1><br>
@@ -584,7 +584,7 @@ public class BQConnection implements Connection {
                             + String.valueOf(timeout));
         }
         try {
-            this.bigquery.datasets().list(this.projectId.replace("__", ":").replace("_", ".")).execute();
+            this.bigquery.datasets().list(this.getProjectId()).execute();
         }
         catch (IOException e) {
             return false;

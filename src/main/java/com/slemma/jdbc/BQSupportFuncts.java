@@ -49,11 +49,21 @@ import com.google.api.services.bigquery.model.TableList.Tables;
 public class BQSupportFuncts {
     /** Google public data project ID */
     static final String PUBLIC_PROJECT_ID = "publicdata";
+    static final String DOT_SUBSTITUTE = "_";
+    static final String COLON_SUBSTITUTE = "__";
 
     /** log4j.Logger instance */
     // static Logger logger = new Logger(BQSupportFuncts.class.getName());
     static Logger logger = Logger.getLogger(BQSupportFuncts.class.getName());
-    
+
+    public static String EncodeProjectId(String projectId) {
+        return projectId.replace(".", DOT_SUBSTITUTE).replace(":", COLON_SUBSTITUTE);
+    }
+
+    public static String DecodeProjectId(String projectId) {
+        return projectId.replace(COLON_SUBSTITUTE, ":").replace(DOT_SUBSTITUTE, ".");
+    }
+
     /**
      * Constructs a valid BigQuery JDBC driver URL from the specified properties
      * File
@@ -122,7 +132,6 @@ public class BQSupportFuncts {
      */
     public static void displayQueryResults(Bigquery bigquery, String projectId,
             Job completedJob) throws IOException {
-        projectId = projectId.replace("__", ":").replace("_", ".");
         GetQueryResultsResponse queryResult = bigquery
                 .jobs()
                 .getQueryResults(projectId,
@@ -158,14 +167,12 @@ public class BQSupportFuncts {
         List<Projects> projects = Connection.getBigquery().projects().list()
                 .execute().getProjects();        
         
-        //since we'll use . -> _ : -> __ conversion, it's easier to
-        // replace all the . : before we do any compare
-        if (projects != null && projects.size() != 0) {             //we got projects!          
+        if (projects != null && projects.size() != 0) {             //we got projects!
             for (Projects projects2 : projects) {                
-                projects2.setId(projects2.getId().replace(".", "_").replace(":", "__"));
+                projects2.setId(projects2.getId());
                 //updating the reference too
                 ProjectReference projRef = projects2.getProjectReference();
-                projRef.setProjectId(projRef.getProjectId().replace(".", "_").replace(":", "__"));
+                projRef.setProjectId(projRef.getProjectId());
                 projects2.setProjectReference(projRef);
             }
             if (catalogName != null) {
@@ -242,7 +249,6 @@ public class BQSupportFuncts {
         logger.debug("function call getDatasets, " + 
             "datasetName: " + (datasetname != null ? datasetname : "null") +
             ", projectId: " + (projectId != null ? projectId : "null"));
-        projectId = projectId.replace("__", ":").replace("_", ".");
         List<Datasets> datasetcontainer = connection.getBigquery().datasets()
                 .list(projectId).execute().getDatasets();
         
@@ -373,7 +379,6 @@ public class BQSupportFuncts {
      */
     public static String getQueryState(Job myjob, Bigquery bigquery,
             String projectId) throws IOException {
-        projectId = projectId.replace("__", ":").replace("_", ".");
         Job pollJob = bigquery.jobs()
                 .get(projectId, myjob.getJobReference().getJobId()).execute();
         BQSupportFuncts.logger.info("Job status: "
@@ -426,7 +431,6 @@ public class BQSupportFuncts {
             ", projectId: " + (projectId != null ? projectId : "null") + 
             ", datasetID:" + (datasetId != null ? datasetId : "null") +
             "connection");
-        projectId = projectId.replace("__", ":").replace("_", ".");
         List<Tables> tables = connection.getBigquery().tables()
                 .list(projectId, datasetId).execute().getTables();
         if (tables != null && tables.size() != 0) {
@@ -492,6 +496,10 @@ public class BQSupportFuncts {
                     connection);
             for (Projects proj : projects) {
                 projectIds.add(proj.getId());
+//                if (proj.getId().contains("."))
+//                    projectIds.add(proj.getNumericId().toString());
+//                else
+//                    projectIds.add(proj.getId());
             }
         } else {
             projectIds.add(catalog);
@@ -522,11 +530,9 @@ public class BQSupportFuncts {
                                 logger.debug("Calling connection.getBigquery().tables() " +
                                         "dataset is: " + datasetString +
                                         ", table is: " + tableString +
-                                        ", project is: " + projId.replace("__", ":").replace("_", "."));
+                                        ", project is: " + projId);
                                 Table tbl = connection.getBigquery().tables()
-                                        .get(projId.replace("__", ":").replace("_", "."),
-                                                datasetString,
-                                                tableString)
+                                        .get(projId, datasetString, tableString)
                                         .execute();
                                 if (tbl != null) {
                                     RET.add(tbl);
@@ -667,7 +673,6 @@ public class BQSupportFuncts {
     public static Job startQuery(Bigquery bigquery, String projectId,
             String querySql) throws IOException {
         BQSupportFuncts.logger.info("Inserting Query Job: " + querySql.replace("\t","").replace("\n", " ").replace("\r", ""));
-        projectId = projectId.replace("__", ":").replace("_", ".");
         Job job = new Job();
         JobConfiguration config = new JobConfiguration();
         JobConfigurationQuery queryConfig = new JobConfigurationQuery();

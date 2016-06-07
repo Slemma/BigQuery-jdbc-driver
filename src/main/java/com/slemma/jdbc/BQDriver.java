@@ -271,16 +271,12 @@ public class BQDriver implements java.sql.Driver {
      */
 
 
-    Properties parseURL(String url, Properties defaults) throws java.sql.SQLException {
+    public Properties parseURL(String url, Properties defaults) throws java.sql.SQLException {
         Properties urlProps = new Properties(defaults);
-
-
-
 	/*
      * Parse parameters after the ? in the URL and remove
 	 * them from the original URL.
 	 */
-
         int index = url.indexOf("?");
 
         if (index != -1) {
@@ -382,6 +378,10 @@ public class BQDriver implements java.sql.Driver {
                                     project_id = st.nextToken();
                                     if (project_id==null) {
                                         return null;
+                                    } else {
+                                        while (st.hasMoreTokens()) {
+                                            project_id += st.nextToken();
+                                        }
                                     }
                                 } else {
                                     return null;

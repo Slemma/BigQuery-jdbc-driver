@@ -411,8 +411,7 @@ class BQDatabaseMetadata implements DatabaseMetaData {
             List<String[]> data = new ArrayList<String[]>();
             for (int i = 0; i < Tables.size(); i++) {
                 String UparsedId = Tables.get(i).getId();
-                String ProjectId = BQSupportFuncts
-                        .getProjectIdFromAnyGetId(UparsedId).replace(":", "__").replace(".", "_");
+                String ProjectId = BQSupportFuncts.getProjectIdFromAnyGetId(UparsedId);
                 String DatasetId = BQSupportFuncts
                         .getDatasetIdFromTableDotGetId(UparsedId);
                 String TableId = BQSupportFuncts
@@ -1397,8 +1396,7 @@ class BQDatabaseMetadata implements DatabaseMetaData {
                     for (Datasets datasets : datasetlist) {
                         data[i][0] = datasets.getDatasetReference()
                                 .getDatasetId();
-                        data[i][1] = datasets.getDatasetReference()
-                                .getProjectId().replace(".", "_").replace(":", "__");
+                        data[i][1] = datasets.getDatasetReference().getProjectId();
                         i++;
                     }
                 }
@@ -1757,13 +1755,13 @@ class BQDatabaseMetadata implements DatabaseMetaData {
             String[][] data = new String[tables.size()][10];
             for (int i = 0; i < tables.size(); i++) {
                 String UparsedId = tables.get(i).getId();
-                data[i][0] = BQSupportFuncts.getProjectIdFromAnyGetId(UparsedId).replace(":", "__").replace(".", "_");
+                data[i][0] = BQSupportFuncts.getProjectIdFromAnyGetId(UparsedId);
                 data[i][1] = BQSupportFuncts.getDatasetIdFromTableDotGetId(UparsedId);
                 data[i][2] = BQSupportFuncts.getTableIdFromTableDotGetId(UparsedId);
                 data[i][3] = "TABLE";
                 data[i][4] = tables.get(i).getDescription();
                 data[i][5] = null;
-                data[i][6] = BQSupportFuncts.getProjectIdFromAnyGetId(UparsedId).replace(":", "__").replace(".", "_");
+                data[i][6] = BQSupportFuncts.getProjectIdFromAnyGetId(UparsedId);
                 data[i][7] = BQSupportFuncts.getDatasetIdFromTableDotGetId(UparsedId);
                 data[i][8] = BQSupportFuncts.getTableIdFromTableDotGetId(UparsedId);                
                 data[i][9] = null;

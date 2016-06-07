@@ -217,7 +217,7 @@ public class TreeBuilder {
             String projectName = null; // to be the 1st parameter of getColumns
             if(srcTable.project != null){
                 //if there's a projectname stored in the srctable
-                projectName = srcTable.getProject().replace(".", "_").replace(":", "__");
+                projectName = srcTable.getProject();
             }
             else{
                 //else we use the connections default
