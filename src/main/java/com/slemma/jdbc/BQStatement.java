@@ -97,7 +97,13 @@ public class BQStatement extends BQStatementRoot implements java.sql.Statement {
             this.logger.debug("Executing Query: " + querySql);
         }
         catch (IOException e) {
-            throw new BQSQLException("Something went wrong with the query:\n" + querySql,e);
+           if (e.getMessage() != null)
+              if (e.getMessage().contains("403 Forbidden"))
+                 throw new BQForbiddenException(String.format("Something went wrong with the query:\n%s\n Original message: %s", querySql, e.getMessage()),e);
+              else
+                 throw new BQSQLException(String.format("Something went wrong with the query:\n%s\n Original message: %s", querySql, e.getMessage()),e);
+           else
+              throw new BQSQLException("Something went wrong with the query:\n" + querySql,e);
         }
         try {
             do {
@@ -130,7 +136,10 @@ public class BQStatement extends BQStatementRoot implements java.sql.Statement {
             // it runs for a minimum of 1 time
         }
         catch (IOException e) {
-            throw new BQSQLException("Something went wrong with the query:\n" + querySql,e);
+           if (e.getMessage() != null && e.getMessage().contains("403 Forbidden"))
+              throw new BQForbiddenException(String.format("Something went wrong with the query:\n%s\n Original message: %s", querySql, e.getMessage()),e);
+           else
+              throw new BQSQLException("Something went wrong with the query:\n" + querySql,e);
         }
         catch (InterruptedException e) {
             e.printStackTrace();

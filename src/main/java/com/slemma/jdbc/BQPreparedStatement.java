@@ -260,7 +260,13 @@ public class BQPreparedStatement extends BQStatementRoot implements
             this.logger.info("Executing Query: " + this.RunnableStatement);
         }
         catch (IOException e) {
-            throw new BQSQLException("Something went wrong with the query:\n" + this.RunnableStatement,e);
+            if (e.getMessage() != null)
+                if (e.getMessage().contains("403 Forbidden"))
+                    throw new BQForbiddenException(String.format("Something went wrong with the query:\n%s\n Original message: %s", this.RunnableStatement, e.getMessage()),e);
+                else
+                    throw new BQSQLException(String.format("Something went wrong with the query:\n%s\n Original message: %s", this.RunnableStatement, e.getMessage()),e);
+            else
+                throw new BQSQLException("Something went wrong with the query:\n" + this.RunnableStatement,e);
         }
         try {
             do {
@@ -293,7 +299,13 @@ public class BQPreparedStatement extends BQStatementRoot implements
             // it runs for a minimum of 1 time
         }
         catch (IOException e) {
-            throw new BQSQLException("Something went wrong with the query:\n" + this.RunnableStatement,e);
+            if (e.getMessage() != null)
+                if (e.getMessage().contains("403 Forbidden"))
+                    throw new BQForbiddenException(String.format("Something went wrong with the query:\n%s\n Original message: %s", this.RunnableStatement, e.getMessage()),e);
+                else
+                    throw new BQSQLException(String.format("Something went wrong with the query:\n%s\n Original message: %s", this.RunnableStatement, e.getMessage()),e);
+            else
+                throw new BQSQLException("Something went wrong with the query:\n" + this.RunnableStatement,e);
         }
         catch (InterruptedException e) {
             e.printStackTrace();
