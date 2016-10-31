@@ -194,7 +194,7 @@ public class BQSupportFuncts {
             }
         }
         else {
-            return null;
+            return new ArrayList<Projects>();
         }
     }
     
@@ -262,7 +262,7 @@ public class BQSupportFuncts {
                     }
                 }
                 if (datasetsSearch.size() == 0) {
-                    return null;
+                    return new ArrayList<Datasets>();
                 }
                 else {
                     return datasetsSearch;
@@ -273,7 +273,7 @@ public class BQSupportFuncts {
             }
         }
         else {
-            return null;
+            return new ArrayList<Datasets>();
         }
     }
     
@@ -444,7 +444,7 @@ public class BQSupportFuncts {
                 }
                 if (tablesSearch.size() == 0) {
                     logger.debug("returning null");
-                    return null;
+                    return new ArrayList<Tables>();
                 }
                 else {
                     return tablesSearch;
@@ -456,7 +456,7 @@ public class BQSupportFuncts {
         }
         else {
             logger.debug("returning null");
-            return null;
+            return new ArrayList<Tables>();
         }
     }
 
@@ -543,14 +543,14 @@ public class BQSupportFuncts {
                 }
             }
             if (RET.size() == 0) {
-                return null;
+                return new ArrayList<Table>();
             }
             else {
                 return RET;
             }
         }
         else {
-            return null;
+            return new ArrayList<Table>();
         }
     }
     
