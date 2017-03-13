@@ -44,6 +44,8 @@ import java.sql.SQLXML;
 import java.sql.Statement;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Map;
@@ -99,6 +101,9 @@ public class BQForwardOnlyResultSet implements java.sql.ResultSet
 	/** Cursor position which goes from -1 to FETCH_SIZE then 0 to FETCH_SIZE
 	 * The -1 is needed because of the while(Result.next() == true) { } iterating method*/
 	private int Cursor = -1;
+
+	private final String ISO_8601_24H_FULL_FORMAT = "yyyy-MM-dd'T'HH:mm:ss";
+	private final SimpleDateFormat simpleIso8601Format = new SimpleDateFormat(ISO_8601_24H_FULL_FORMAT);
 
 	/**
 	 * Constructor for the forward only resultset
@@ -224,6 +229,19 @@ public class BQForwardOnlyResultSet implements java.sql.ResultSet
 				{
 					long val = new BigDecimal(result).longValue() * 1000;
 					return new Timestamp(val);
+				}
+				if (Columntype.equals("DATETIME"))
+				{
+					try
+					{
+						java.util.Date dt = simpleIso8601Format.parse(result);
+						return new Timestamp(dt.getTime()).toString();
+					}
+					catch (ParseException e)
+					{
+						logger.error("Couldn't parse date", e);
+						return null;
+					}
 				}
 				throw new BQSQLException("Unsupported Type (" + Columntype + ")");
 			}

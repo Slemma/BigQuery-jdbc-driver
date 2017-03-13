@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.net.URLEncoder;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -684,5 +685,45 @@ public class BQSupportFuncts {
         Insert insert = bigquery.jobs().insert(querySql, job);
         insert.setProjectId(projectId);
         return insert.execute();
+    }
+
+    public static int getJdbcTypeByTypeName(String typeName)
+    {
+        if (typeName.equals("FLOAT"))
+        {
+            return java.sql.Types.FLOAT;
+        }
+        else if (typeName.equals("BOOLEAN"))
+        {
+            return java.sql.Types.BOOLEAN;
+        }
+        else if (typeName.equals("INTEGER"))
+        {
+            return java.sql.Types.INTEGER;
+        }
+        else if (typeName.equals("STRING"))
+        {
+            return java.sql.Types.VARCHAR;
+        }
+        else if (typeName.equals("TIMESTAMP"))
+        {
+            return java.sql.Types.TIMESTAMP;
+        }
+        else if (typeName.equals("DATE"))
+        {
+            return java.sql.Types.DATE;
+        }
+        else if (typeName.equals("TIME"))
+        {
+            return java.sql.Types.TIME;
+        }
+        else if (typeName.equals("DATETIME"))
+        {
+            return java.sql.Types.TIMESTAMP;
+        }
+        else
+        {
+            return java.sql.Types.NULL;
+        }
     }
 }
