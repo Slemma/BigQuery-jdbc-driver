@@ -48,6 +48,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Map;
 
 import com.google.api.client.googleapis.json.GoogleJsonError;
@@ -62,54 +63,97 @@ import com.google.api.client.util.Data;
  * This class implements the java.sql.ResultSet interface, as a Forward only resultset
  *
  * @author Balazs Gunics
- *
- *
  */
 public class BQForwardOnlyResultSet implements java.sql.ResultSet
 {
 
 	// Logger logger = new Logger(ScrollableResultset.class.getName());
 	Logger logger = Logger.getLogger(BQForwardOnlyResultSet.class.getName());
-	/** Reference for holding the current InputStream given back by get methods */
+	/**
+	 * Reference for holding the current InputStream given back by get methods
+	 */
 	protected InputStream Strm = null;
 
-	/** The boolean that holds if the last get has given back null or not */
+	/**
+	 * The boolean that holds if the last get has given back null or not
+	 */
 	protected boolean wasnull = false;
 
-	/** The Array which get iterated with cursor it's size can be set with FETCH_SIZE*/
+	/**
+	 * The Array which get iterated with cursor it's size can be set with FETCH_SIZE
+	 */
 	protected Object[] RowsofResult;
 
-	/** This holds if the resultset is closed or not */
+	/**
+	 * This holds if the resultset is closed or not
+	 */
 	protected Boolean Closed = false;
 
-	/**Paging size, the original result will be paged by FETCH_SIZE rows     */
+	/**
+	 * Paging size, the original result will be paged by FETCH_SIZE rows
+	 */
 	protected int FETCH_SIZE = 100;
-	/**The Fetched rows count at the original results     */
+	/**
+	 * The Fetched rows count at the original results
+	 */
 	protected BigInteger FETCH_POS = BigInteger.ZERO;
-	/** Are we at the first row? */
+	/**
+	 * Are we at the first row?
+	 */
 	protected boolean AT_FIRST = true;
-	/** REference for the original statement which created this resultset     */
+	/**
+	 * REference for the original statement which created this resultset
+	 */
 	private Statement Statementreference;
-	/** First page of the Results */
+	/**
+	 * First page of the Results
+	 */
 	private GetQueryResultsResponse Result;
-	/** BigQuery Client */
+	/**
+	 * BigQuery Client
+	 */
 	private Bigquery bigquery;
-	/** the ProjectId */
+	/**
+	 * the ProjectId
+	 */
 	private String projectId;
-	/** Reference for the Job */
+	/**
+	 * Reference for the Job
+	 */
 	private Job completedJob;
-	/** Cursor position which goes from -1 to FETCH_SIZE then 0 to FETCH_SIZE
-	 * The -1 is needed because of the while(Result.next() == true) { } iterating method*/
+	/**
+	 * Cursor position which goes from -1 to FETCH_SIZE then 0 to FETCH_SIZE
+	 * The -1 is needed because of the while(Result.next() == true) { } iterating method
+	 */
 	private int Cursor = -1;
 
 	private final String ISO_8601_24H_FULL_FORMAT = "yyyy-MM-dd'T'HH:mm:ss";
 	private final SimpleDateFormat simpleIso8601Format = new SimpleDateFormat(ISO_8601_24H_FULL_FORMAT);
 
+
+	public static List<String> generateFieldsWithDot(String fieldName)
+	{
+		ArrayList<String> result = new ArrayList<String>(0);
+		String charStr = "_";
+		if (fieldName.contains(charStr))
+		{
+			int index = fieldName.indexOf(charStr);
+			while (index >= 0)
+			{
+				result.add(fieldName.substring(0, index) + "." + fieldName.substring(index + 1, fieldName.length()));
+				index = fieldName.indexOf(charStr, index + 1);
+			}
+		}
+
+		return result;
+	}
+
 	/**
 	 * Constructor for the forward only resultset
-	 * @param bigquery - the bigquery client to be used to connect
-	 * @param projectId - the project which contains the Job
-	 * @param completedJob - the Job ID, which will be used to get the results
+	 *
+	 * @param bigquery        - the bigquery client to be used to connect
+	 * @param projectId       - the project which contains the Job
+	 * @param completedJob    - the Job ID, which will be used to get the results
 	 * @param bqStatementRoot - reference for the Statement which created the result
 	 * @throws SQLException - if we fail to get the results
 	 */
@@ -136,15 +180,18 @@ public class BQForwardOnlyResultSet implements java.sql.ResultSet
 				for (TableFieldSchema fieldSchema : fieldsList)
 				{
 					String fieldName = fieldSchema.getName();
-					String fieldNameWithDot = fieldName.replace("_", ".");
-					if (fieldName.contains("_")
-							  && sqlLowerString.contains(fieldNameWithDot.toLowerCase())
-							  && !sqlLowerString.replace(" ", "").replace("[","").replace("]","").contains(fieldNameWithDot.toLowerCase() + "as" + fieldName.toLowerCase()) //check if alias used (level1.level2 as level1_level2)
-							  && !sqlLowerString.replace(" ", "").replace("[","").replace("]","").contains(fieldNameWithDot.toLowerCase() + fieldName.toLowerCase()) //check if alias used (level1.level2 level1_level2)
-							  )
+					if (fieldName.contains("_"))
 					{
-						//try find nested field (with dot) in sql query
-						fieldSchema.setName(fieldNameWithDot);
+						for (String fieldNameWithDot : this.generateFieldsWithDot(fieldName))
+						{
+							if (sqlLowerString.contains(fieldNameWithDot.toLowerCase())
+									  && !sqlLowerString.replace(" ", "").replace("[", "").replace("]", "").contains(fieldNameWithDot.toLowerCase() + "as" + fieldName.toLowerCase()) //check if alias used (level1.level2 as level1_level2)
+									  && !sqlLowerString.replace(" ", "").replace("[", "").replace("]", "").contains(fieldNameWithDot.toLowerCase() + fieldName.toLowerCase())) //check if alias used (level1.level2 level1_level2))
+							{
+								fieldSchema.setName(fieldNameWithDot);
+								break;
+							}
+						}
 					}
 				}
 			}
@@ -175,6 +222,7 @@ public class BQForwardOnlyResultSet implements java.sql.ResultSet
 
 	/**
 	 * Returns the current rows Object at the given index
+	 *
 	 * @param columnIndex - the column to be used
 	 * @return - the stored value parsed to String, Float etc
 	 * @throws SQLException - if the resultset is closed or the columnIndex is not valid, or the type is unsupported
@@ -291,6 +339,7 @@ public class BQForwardOnlyResultSet implements java.sql.ResultSet
 
 	/**
 	 * Not supported in forward only resultset
+	 *
 	 * @param row
 	 * @return - SQLException
 	 * @throws SQLException - this isn't a forward only resultset
@@ -304,6 +353,7 @@ public class BQForwardOnlyResultSet implements java.sql.ResultSet
 
 	/**
 	 * Not supported in forward only resultset
+	 *
 	 * @throws SQLException - this isn't a forward only resultset
 	 */
 	@Override
@@ -318,6 +368,7 @@ public class BQForwardOnlyResultSet implements java.sql.ResultSet
 
 	/**
 	 * Not supported in forward only resultset
+	 *
 	 * @throws SQLException - this isn't a forward only resultset
 	 */
 	@Override
@@ -374,8 +425,7 @@ public class BQForwardOnlyResultSet implements java.sql.ResultSet
 	 * If the Strm reference is not null it closes the underlying stream, if an
 	 * error occurs throws SQLException</p>
 	 *
-	 * @throws SQLException
-	 *             if error occurs while trying to close the stream
+	 * @throws SQLException if error occurs while trying to close the stream
 	 */
 	protected void closestrm() throws SQLException
 	{
@@ -434,6 +484,7 @@ public class BQForwardOnlyResultSet implements java.sql.ResultSet
 
 	/**
 	 * Not supported in forward only resultset
+	 *
 	 * @return - SQLException
 	 * @throws SQLException - this isn't a forward only resultset
 	 */
@@ -472,7 +523,9 @@ public class BQForwardOnlyResultSet implements java.sql.ResultSet
 		throw new BQSQLFeatureNotSupportedException("getArray(string)");
 	}
 
-	/** {@inheritDoc} */
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public InputStream getAsciiStream(int columnIndex) throws SQLException
 	{
@@ -502,7 +555,9 @@ public class BQForwardOnlyResultSet implements java.sql.ResultSet
 		}
 	}
 
-	/** {@inheritDoc} */
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public InputStream getAsciiStream(String columnLabel) throws SQLException
 	{
@@ -532,7 +587,9 @@ public class BQForwardOnlyResultSet implements java.sql.ResultSet
 		}
 	}
 
-	/** {@inheritDoc} */
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public BigDecimal getBigDecimal(int columnIndex) throws SQLException
 	{
@@ -595,7 +652,9 @@ public class BQForwardOnlyResultSet implements java.sql.ResultSet
 
 	// Implemented Get functions Using Cursor
 
-	/** {@inheritDoc} */
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public BigDecimal getBigDecimal(int columnIndex, int scale)
 			  throws SQLException
@@ -603,7 +662,9 @@ public class BQForwardOnlyResultSet implements java.sql.ResultSet
 		return this.getBigDecimal(columnIndex).setScale(scale);
 	}
 
-	/** {@inheritDoc} */
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public BigDecimal getBigDecimal(String columnLabel) throws SQLException
 	{
@@ -611,7 +672,9 @@ public class BQForwardOnlyResultSet implements java.sql.ResultSet
 		return this.getBigDecimal(columnIndex);
 	}
 
-	/** {@inheritDoc} */
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public BigDecimal getBigDecimal(String columnLabel, int scale)
 			  throws SQLException
@@ -620,7 +683,9 @@ public class BQForwardOnlyResultSet implements java.sql.ResultSet
 		return this.getBigDecimal(columnIndex, scale);
 	}
 
-	/** {@inheritDoc} */
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public InputStream getBinaryStream(int columnIndex) throws SQLException
 	{
@@ -642,7 +707,9 @@ public class BQForwardOnlyResultSet implements java.sql.ResultSet
 		}
 	}
 
-	/** {@inheritDoc} */
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public InputStream getBinaryStream(String columnLabel) throws SQLException
 	{
@@ -692,7 +759,9 @@ public class BQForwardOnlyResultSet implements java.sql.ResultSet
 		throw new BQSQLFeatureNotSupportedException("getBlob(string)");
 	}
 
-	/** {@inheritDoc} */
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public boolean getBoolean(int columnIndex) throws SQLException
 	{
@@ -707,7 +776,9 @@ public class BQForwardOnlyResultSet implements java.sql.ResultSet
 		}
 	}
 
-	/** {@inheritDoc} */
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public boolean getBoolean(String columnLabel) throws SQLException
 	{
@@ -715,7 +786,9 @@ public class BQForwardOnlyResultSet implements java.sql.ResultSet
 		return this.getBoolean(columnIndex);
 	}
 
-	/** {@inheritDoc} */
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public byte getByte(int columnIndex) throws SQLException
 	{
@@ -737,7 +810,9 @@ public class BQForwardOnlyResultSet implements java.sql.ResultSet
 		}
 	}
 
-	/** {@inheritDoc} */
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public byte getByte(String columnLabel) throws SQLException
 	{
@@ -745,7 +820,9 @@ public class BQForwardOnlyResultSet implements java.sql.ResultSet
 		return this.getByte(columnIndex);
 	}
 
-	/** {@inheritDoc} */
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public byte[] getBytes(int columnIndex) throws SQLException
 	{
@@ -760,7 +837,9 @@ public class BQForwardOnlyResultSet implements java.sql.ResultSet
 		}
 	}
 
-	/** {@inheritDoc} */
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public byte[] getBytes(String columnLabel) throws SQLException
 	{
@@ -768,7 +847,9 @@ public class BQForwardOnlyResultSet implements java.sql.ResultSet
 		return this.getBytes(columnIndex);
 	}
 
-	/** {@inheritDoc} */
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public Reader getCharacterStream(int columnIndex) throws SQLException
 	{
@@ -787,7 +868,9 @@ public class BQForwardOnlyResultSet implements java.sql.ResultSet
 		}
 	}
 
-	/** {@inheritDoc} */
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public Reader getCharacterStream(String columnLabel) throws SQLException
 	{
@@ -866,7 +949,9 @@ public class BQForwardOnlyResultSet implements java.sql.ResultSet
 		throw new BQSQLFeatureNotSupportedException("getCursorName()");
 	}
 
-	/** {@inheritDoc} */
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public Date getDate(int columnIndex) throws SQLException
 	{
@@ -881,7 +966,9 @@ public class BQForwardOnlyResultSet implements java.sql.ResultSet
 		}
 	}
 
-	/** {@inheritDoc} */
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public Date getDate(int columnIndex, Calendar cal) throws SQLException
 	{
@@ -896,7 +983,9 @@ public class BQForwardOnlyResultSet implements java.sql.ResultSet
 		}
 	}
 
-	/** {@inheritDoc} */
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public Date getDate(String columnLabel) throws SQLException
 	{
@@ -904,7 +993,9 @@ public class BQForwardOnlyResultSet implements java.sql.ResultSet
 		return this.getDate(columnIndex);
 	}
 
-	/** {@inheritDoc} */
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public Date getDate(String columnLabel, Calendar cal) throws SQLException
 	{
@@ -912,7 +1003,9 @@ public class BQForwardOnlyResultSet implements java.sql.ResultSet
 		return this.getDate(columnIndex, cal);
 	}
 
-	/** {@inheritDoc} */
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public double getDouble(int columnIndex) throws SQLException
 	{
@@ -934,7 +1027,9 @@ public class BQForwardOnlyResultSet implements java.sql.ResultSet
 		}
 	}
 
-	/** {@inheritDoc} */
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public double getDouble(String columnLabel) throws SQLException
 	{
@@ -971,7 +1066,9 @@ public class BQForwardOnlyResultSet implements java.sql.ResultSet
 		return FETCH_SIZE;
 	}
 
-	/** {@inheritDoc} */
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public float getFloat(int columnIndex) throws SQLException
 	{
@@ -993,7 +1090,9 @@ public class BQForwardOnlyResultSet implements java.sql.ResultSet
 		}
 	}
 
-	/** {@inheritDoc} */
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public float getFloat(String columnLabel) throws SQLException
 	{
@@ -1015,7 +1114,9 @@ public class BQForwardOnlyResultSet implements java.sql.ResultSet
 		return ResultSet.CLOSE_CURSORS_AT_COMMIT;
 	}
 
-	/** {@inheritDoc} */
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public int getInt(int columnIndex) throws SQLException
 	{
@@ -1037,7 +1138,9 @@ public class BQForwardOnlyResultSet implements java.sql.ResultSet
 		}
 	}
 
-	/** {@inheritDoc} */
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public int getInt(String columnLabel) throws SQLException
 	{
@@ -1045,7 +1148,9 @@ public class BQForwardOnlyResultSet implements java.sql.ResultSet
 		return this.getInt(columnIndex);
 	}
 
-	/** {@inheritDoc} */
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public long getLong(int columnIndex) throws SQLException
 	{
@@ -1067,7 +1172,9 @@ public class BQForwardOnlyResultSet implements java.sql.ResultSet
 		}
 	}
 
-	/** {@inheritDoc} */
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public long getLong(String columnLabel) throws SQLException
 	{
@@ -1193,7 +1300,9 @@ public class BQForwardOnlyResultSet implements java.sql.ResultSet
 		// TODO Implement TypeMaps
 	}
 
-	/** {@inheritDoc} */
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public Object getObject(String columnLabel) throws SQLException
 	{
@@ -1245,7 +1354,9 @@ public class BQForwardOnlyResultSet implements java.sql.ResultSet
 		throw new BQSQLFeatureNotSupportedException("getref(String)");
 	}
 
-	/** {@inheritDoc} */
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public int getRow() throws SQLException
 	{
@@ -1281,7 +1392,9 @@ public class BQForwardOnlyResultSet implements java.sql.ResultSet
 		throw new BQSQLFeatureNotSupportedException("getRowId(String)");
 	}
 
-	/** {@inheritDoc} */
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public short getShort(int columnIndex) throws SQLException
 	{
@@ -1303,7 +1416,9 @@ public class BQForwardOnlyResultSet implements java.sql.ResultSet
 		}
 	}
 
-	/** {@inheritDoc} */
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public short getShort(String columnLabel) throws SQLException
 	{
@@ -1311,7 +1426,9 @@ public class BQForwardOnlyResultSet implements java.sql.ResultSet
 		return this.getShort(columnIndex);
 	}
 
-	/** {@inheritDoc} */
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public SQLXML getSQLXML(int columnIndex) throws SQLException
 	{
@@ -1319,7 +1436,9 @@ public class BQForwardOnlyResultSet implements java.sql.ResultSet
 				  this.getString(columnIndex));
 	}
 
-	/** {@inheritDoc} */
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public SQLXML getSQLXML(String columnLabel) throws SQLException
 	{
@@ -1341,7 +1460,9 @@ public class BQForwardOnlyResultSet implements java.sql.ResultSet
 		return this.Statementreference;
 	}
 
-	/** {@inheritDoc} */
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public String getString(String columnLabel) throws SQLException
 	{
@@ -1350,7 +1471,9 @@ public class BQForwardOnlyResultSet implements java.sql.ResultSet
 
 	}
 
-	/** {@inheritDoc} */
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public Time getTime(int columnIndex) throws SQLException
 	{
@@ -1365,12 +1488,14 @@ public class BQForwardOnlyResultSet implements java.sql.ResultSet
 		}
 	}
 
-	/** {@inheritDoc} */
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public Time getTime(int columnIndex, Calendar cal) throws SQLException
 	{
 		  /*
-         * Select STRFTIME_UTC_USEC(NOW(),'%x-%X%Z') AS One,
+			* Select STRFTIME_UTC_USEC(NOW(),'%x-%X%Z') AS One,
          * FORMAT_UTC_USEC(NOW()) as Two"; Result: One Two 08/21/12-15:40:45GMT
          * 2012-08-21 15:40:45.703908
          */
@@ -1385,7 +1510,9 @@ public class BQForwardOnlyResultSet implements java.sql.ResultSet
 		}
 	}
 
-	/** {@inheritDoc} */
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public Time getTime(String columnLabel) throws SQLException
 	{
@@ -1393,7 +1520,9 @@ public class BQForwardOnlyResultSet implements java.sql.ResultSet
 		return this.getTime(columnIndex);
 	}
 
-	/** {@inheritDoc} */
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public Time getTime(String columnLabel, Calendar cal) throws SQLException
 	{
@@ -1401,7 +1530,9 @@ public class BQForwardOnlyResultSet implements java.sql.ResultSet
 		return this.getTime(columnIndex, cal);
 	}
 
-	/** {@inheritDoc} */
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public Timestamp getTimestamp(int columnIndex) throws SQLException
 	{
@@ -1416,7 +1547,9 @@ public class BQForwardOnlyResultSet implements java.sql.ResultSet
 		}
 	}
 
-	/** {@inheritDoc} */
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public Timestamp getTimestamp(int columnIndex, Calendar cal)
 			  throws SQLException
@@ -1433,7 +1566,9 @@ public class BQForwardOnlyResultSet implements java.sql.ResultSet
 		}
 	}
 
-	/** {@inheritDoc} */
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public Timestamp getTimestamp(String columnLabel) throws SQLException
 	{
@@ -1441,7 +1576,9 @@ public class BQForwardOnlyResultSet implements java.sql.ResultSet
 		return this.getTimestamp(columnIndex);
 	}
 
-	/** {@inheritDoc} */
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public Timestamp getTimestamp(String columnLabel, Calendar cal)
 			  throws SQLException
@@ -1498,7 +1635,9 @@ public class BQForwardOnlyResultSet implements java.sql.ResultSet
 				  "Deprecated. use getCharacterStream in place of getUnicodeStream");
 	}
 
-	/** {@inheritDoc} */
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public URL getURL(int columnIndex) throws SQLException
 	{
@@ -1520,7 +1659,9 @@ public class BQForwardOnlyResultSet implements java.sql.ResultSet
 		}
 	}
 
-	/** {@inheritDoc} */
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public URL getURL(String columnLabel) throws SQLException
 	{
@@ -1571,7 +1712,9 @@ public class BQForwardOnlyResultSet implements java.sql.ResultSet
 		throw new BQSQLFeatureNotSupportedException("insertRow()");
 	}
 
-	/** {@inheritDoc} */
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public boolean isAfterLast() throws SQLException
 	{
@@ -1582,7 +1725,9 @@ public class BQForwardOnlyResultSet implements java.sql.ResultSet
 		throw new BQSQLException("Forward_only resultset doesn't support isAfterLast() ");
 	}
 
-	/** {@inheritDoc} */
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public boolean isBeforeFirst() throws SQLException
 	{
@@ -1594,14 +1739,18 @@ public class BQForwardOnlyResultSet implements java.sql.ResultSet
 		throw new BQSQLException("Forward_only resultset doesn't support isBeforeFirst() ");
 	}
 
-	/** {@inheritDoc} */
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public boolean isClosed() throws SQLException
 	{
 		return this.Closed;
 	}
 
-	/** {@inheritDoc} */
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public boolean isFirst() throws SQLException
 	{
@@ -1612,7 +1761,9 @@ public class BQForwardOnlyResultSet implements java.sql.ResultSet
 		return AT_FIRST;
 	}
 
-	/** {@inheritDoc} */
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public boolean isLast() throws SQLException
 	{
@@ -1633,7 +1784,9 @@ public class BQForwardOnlyResultSet implements java.sql.ResultSet
 		return false;
 	}
 
-	/** {@inheritDoc} */
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public boolean last() throws SQLException
 	{
@@ -1669,7 +1822,9 @@ public class BQForwardOnlyResultSet implements java.sql.ResultSet
 		throw new BQSQLFeatureNotSupportedException("moveToInsertRow()");
 	}
 
-	/** {@inheritDoc} */
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public boolean next() throws SQLException
 	{
@@ -1716,7 +1871,9 @@ public class BQForwardOnlyResultSet implements java.sql.ResultSet
 		}
 	}
 
-	/** {@inheritDoc} */
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public boolean previous() throws SQLException
 	{
@@ -1738,7 +1895,9 @@ public class BQForwardOnlyResultSet implements java.sql.ResultSet
 		throw new BQSQLFeatureNotSupportedException("refreshRow()");
 	}
 
-	/** {@inheritDoc} */
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public boolean relative(int rows) throws SQLException
 	{
@@ -3036,7 +3195,9 @@ public class BQForwardOnlyResultSet implements java.sql.ResultSet
 		throw new BQSQLFeatureNotSupportedException();
 	}
 
-	/** {@inheritDoc} */
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public boolean wasNull() throws SQLException
 	{
@@ -3045,14 +3206,18 @@ public class BQForwardOnlyResultSet implements java.sql.ResultSet
 
 	//------------------------- for Jdk1.7 -----------------------------------
 
-	/** {@inheritDoc} */
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public <T> T getObject(int columnIndex, Class<T> type) throws SQLException
 	{
 		return null;
 	}
 
-	/** {@inheritDoc} */
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public <T> T getObject(String columnLabel, Class<T> type) throws SQLException
 	{

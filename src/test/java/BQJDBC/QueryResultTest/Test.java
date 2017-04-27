@@ -19,17 +19,7 @@ public class Test {
     public static void main(String[] args) throws RecognitionException {
         // TODO Auto-generated method stub
 
-        CharStream stream = new ANTLRStringStream("SELECT\r\n" + 
-        		"      \"starschema.net:clouddb\":efashion.ARTICLE_LOOKUP.ARTICLE_CODE,\r\n" + 
-        		"      \"starschema.net:clouddb\":efashion.ARTICLE_LOOKUP.FAMILY_NAME,\r\n" + 
-        		"      ARTICLE_COLOR_LOOKUP.COLOR_CODE,\r\n" + 
-        		"      ARTICLE_COLOR_LOOKUP.ARTICLE_LABEL\r\n" + 
-        		"FROM\r\n" + 
-        		"      \"starschema.net:clouddb\":efashion.ARTICLE_LOOKUP,\r\n" + 
-        		"      \"starschema.net:clouddb\":efashion.ARTICLE_COLOR_LOOKUP ARTICLE_COLOR_LOOKUP\r\n" + 
-        		"WHERE\r\n" + 
-        		"      \"starschema.net:clouddb\":efashion.ARTICLE_LOOKUP.ARTICLE_CODE = \r\n" + 
-        		"      ARTICLE_COLOR_LOOKUP.ARTICLE_CODE");
+        CharStream stream = new ANTLRStringStream("select f1, f2 from Table1 UNION select f1, f2 from Table2");
         /*stream = new ANTLRStringStream("SELECT al.CATEGORY,COUNT(acl.ARTICLE_CODE) FROM efashion.ARTICLE_LOOKUP al \r\n" + 
         		" , efashion.ARTICLE_COLOR_LOOKUP acl \r\n" + 
         		"WHERE al.ARTICLE_CODE = acl.ARTICLE_CODE \r\n" + 

@@ -22,6 +22,7 @@
  */
 package BQJDBC.QueryResultTest;
 
+import com.slemma.jdbc.BQForwardOnlyResultSet;
 import org.junit.Assert;
 import com.slemma.jdbc.BQConnection;
 import com.slemma.jdbc.BQSupportFuncts;
@@ -34,6 +35,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.List;
 import java.util.Properties;
 
 /**
@@ -495,4 +497,18 @@ public class QueryResultTest {
             Assert.fail();
         }
     }
+
+
+    @Test
+    public void GenerateFieldsWithDot() {
+        List<String> strList = BQForwardOnlyResultSet.generateFieldsWithDot("a_b");
+        Assert.assertEquals(1,strList.size());
+        Assert.assertEquals("a.b",strList.get(0));
+
+        strList = BQForwardOnlyResultSet.generateFieldsWithDot("a_b_c");
+        Assert.assertEquals(2,strList.size());
+        Assert.assertEquals(true,strList.contains("a.b_c"));
+        Assert.assertEquals(true,strList.contains("a_b.c"));
+    }
+
 }

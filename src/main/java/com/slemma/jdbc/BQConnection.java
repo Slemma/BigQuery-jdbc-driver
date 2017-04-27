@@ -173,10 +173,10 @@ public class BQConnection implements Connection {
                 this.logger.info("Authorized with service account");
             }
             catch (GeneralSecurityException e) {
-                throw new BQSQLException(e);
+                throw new BQAuthorizationException(e.getMessage());
             }
             catch (IOException e) {
-                throw new BQSQLException(e);
+                throw new BQAuthorizationException(e.getMessage());
             }
         }
         //let use Oauth
@@ -186,7 +186,7 @@ public class BQConnection implements Connection {
                 this.logger.info("Authorized with Oauth");
             }
             catch (IOException e) {
-                throw new BQSQLException(e);
+                throw new BQAuthorizationException(e.getMessage());
             }
         }
 
@@ -198,7 +198,12 @@ public class BQConnection implements Connection {
         }
         catch (IOException e)
         {
-            throw new BQSQLException(e.getMessage());
+            if (e.getMessage().contains("invalid_grant"))
+                throw new BQAccessDeniedException(e.getMessage());
+            else if (e.getMessage().contains("accessDenied"))
+                throw new BQAuthorizationException(e.getMessage());
+            else
+                throw new BQSQLException(e.getMessage());
         }
 
         logger.debug("The project id for this connections is: " + this.projectId);
