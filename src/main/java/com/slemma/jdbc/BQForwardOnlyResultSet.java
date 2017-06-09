@@ -166,6 +166,7 @@ public class BQForwardOnlyResultSet implements java.sql.ResultSet
 		this.bigquery = bigquery;
 		this.completedJob = completedJob;
 		this.projectId = projectId;
+		this.FETCH_SIZE = bqStatementRoot.getFetchSize();
 		// initial load
 		try
 		{
@@ -1972,7 +1973,7 @@ public class BQForwardOnlyResultSet implements java.sql.ResultSet
 	@Override
 	public void setFetchSize(int rows) throws SQLException
 	{
-		FETCH_SIZE = rows;
+		throw new BQSQLException("Not implemented." + "getFetchSize(). Use Statement.setFetchSize instead");
 	}
 
 	/**

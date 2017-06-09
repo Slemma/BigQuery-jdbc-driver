@@ -79,7 +79,9 @@ public abstract class BQStatementRoot {
      */
     int resultSetType;
     int resultSetConcurrency;
-    
+
+    protected int FETCH_SIZE = 100;
+
     /**
      * to be used with setMaxFieldSize
      */
@@ -391,7 +393,7 @@ public abstract class BQStatementRoot {
      */
     
     public int getFetchSize() throws SQLException {
-        throw new BQSQLException("Not implemented." + "getFetchSize()");
+        return this.FETCH_SIZE;
     }
     
     /**
@@ -688,9 +690,7 @@ public abstract class BQStatementRoot {
      * @throws BQSQLException
      */
     public void setFetchSize(int arg0) throws SQLException {
-        if (this.isClosed()) {
-            throw new BQSQLException("Statement closed");
-        }
+        this.FETCH_SIZE = arg0;
     }
     
     /**
