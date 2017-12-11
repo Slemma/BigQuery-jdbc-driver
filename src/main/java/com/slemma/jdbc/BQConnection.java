@@ -117,7 +117,10 @@ public class BQConnection implements Connection {
     
     /** String to contain the url except the url prefix */
     private String URLPART = null;
-    
+
+    /** time zone */
+    private String timeZone;
+
     /**
      * Extracts the JDBC URL then makes a connection to the Bigquery.
      * 
@@ -161,6 +164,12 @@ public class BQConnection implements Connection {
         String userId = info.getProperty("user");
         String userKey = info.getProperty("password");
         String refreshToken = info.getProperty("refreshToken");
+
+        String timeZoneProp = info.getProperty("timeZone");
+        if (timeZoneProp != null)
+            this.timeZone = timeZoneProp;
+        else
+            this.timeZone = "UTC";
 
         /**
          * Lets make a connection:
@@ -1011,5 +1020,16 @@ public class BQConnection implements Connection {
     @Override
     public void setSchema(String schema) throws SQLException {
 
+    }
+
+
+    public String getTimeZone()
+    {
+        return timeZone;
+    }
+
+    public void setTimeZone(String value)
+    {
+        this.timeZone = value;
     }
 }

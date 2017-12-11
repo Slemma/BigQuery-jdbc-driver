@@ -1125,12 +1125,21 @@ abstract class ScrollableResultset<T> implements java.sql.ResultSet {
     /** {@inheritDoc} */
     @Override
     public Timestamp getTimestamp(int columnIndex) throws SQLException {
-        Long value = this.getLong(columnIndex);
-        if (this.wasNull()) {
+        if (this.wasNull())
+        {
             return null;
         }
-        else {
-            return new java.sql.Timestamp(value);
+        else
+        {
+            Object value = this.getObject(columnIndex);
+            if (this.getMetaData().getColumnTypeName(columnIndex).equals("DATE"))
+                return new Timestamp(((Date) value).getTime());
+            else if (this.getMetaData().getColumnTypeName(columnIndex).equals("DATETIME"))
+                return (java.sql.Timestamp)value;
+            else if (this.getMetaData().getColumnTypeName(columnIndex).equals("TIMESTAMP"))
+                return (java.sql.Timestamp)value;
+            else
+                throw new IllegalArgumentException("Unsupported data type");
         }
     }
     
@@ -1138,14 +1147,7 @@ abstract class ScrollableResultset<T> implements java.sql.ResultSet {
     @Override
     public Timestamp getTimestamp(int columnIndex, Calendar cal)
             throws SQLException {
-        Long value = this.getLong(columnIndex);
-        if (this.wasNull()) {
-            return null;
-        }
-        else {
-            return new java.sql.Timestamp(cal.getTimeZone().getRawOffset()
-                    + value);
-        }
+        return getTimestamp(columnIndex);
     }
     
     /** {@inheritDoc} */

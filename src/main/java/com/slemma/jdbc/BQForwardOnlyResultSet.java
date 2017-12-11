@@ -45,7 +45,6 @@ import java.sql.Statement;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -69,6 +68,12 @@ public class BQForwardOnlyResultSet implements java.sql.ResultSet
 
 	// Logger logger = new Logger(ScrollableResultset.class.getName());
 	Logger logger = Logger.getLogger(BQForwardOnlyResultSet.class.getName());
+
+	/**
+	 * to set the maxFieldSize
+	 */
+	private int maxFieldSize = 0;
+
 	/**
 	 * Reference for holding the current InputStream given back by get methods
 	 */
@@ -126,9 +131,6 @@ public class BQForwardOnlyResultSet implements java.sql.ResultSet
 	 * The -1 is needed because of the while(Result.next() == true) { } iterating method
 	 */
 	private int Cursor = -1;
-
-	private final String ISO_8601_24H_FULL_FORMAT = "yyyy-MM-dd'T'HH:mm:ss";
-	private final SimpleDateFormat simpleIso8601Format = new SimpleDateFormat(ISO_8601_24H_FULL_FORMAT);
 
 
 	public static List<String> generateFieldsWithDot(String fieldName)
@@ -206,6 +208,13 @@ public class BQForwardOnlyResultSet implements java.sql.ResultSet
 		{
 			throw new SQLException("Failed to retrieve data", e);
 		} //should not happen
+
+		try {
+			maxFieldSize = bqStatementRoot.getMaxFieldSize();
+		} catch (SQLException e) {
+			// Should not happen.
+		}
+
 		if (this.Result == null)
 		{  //if we don't have results at all
 			this.RowsofResult = null;
@@ -219,6 +228,11 @@ public class BQForwardOnlyResultSet implements java.sql.ResultSet
 			this.RowsofResult = this.Result.getRows().toArray();
 			FETCH_POS = FETCH_POS.add(BigInteger.valueOf((long) this.RowsofResult.length));
 		}
+	}
+
+	protected BQConnection getConnection() throws SQLException
+	{
+		return (BQConnection)this.Statementreference.getConnection();
 	}
 
 	/**
@@ -283,8 +297,21 @@ public class BQForwardOnlyResultSet implements java.sql.ResultSet
 				{
 					try
 					{
-						java.util.Date dt = simpleIso8601Format.parse(result);
-						return new Timestamp(dt.getTime()).toString();
+						java.util.Date dt = BQSupportFuncts.DATETIME_Format.parse(result);
+						return new Timestamp(dt.getTime());
+					}
+					catch (ParseException e)
+					{
+						logger.error("Couldn't parse datetime", e);
+						return null;
+					}
+				}
+				if (Columntype.equals("DATE"))
+				{
+					try
+					{
+						java.util.Date dt = BQSupportFuncts.DATE_Format.parse(result);
+						return new Date(dt.getTime());
 					}
 					catch (ParseException e)
 					{
@@ -334,7 +361,28 @@ public class BQForwardOnlyResultSet implements java.sql.ResultSet
 		else
 		{
 			this.wasnull = false;
-			return field.getV().toString();
+			String result;
+
+			if (this.getMetaData().getColumnTypeName(columnIndex).equals("TIMESTAMP"))
+			{
+				long tsLong = Double.valueOf((String) field.getV()).longValue()*1000;
+				Timestamp ts = new Timestamp(tsLong);
+				result =  BQSupportFuncts.timestampToString(ts, this.getConnection().getTimeZone());
+			}
+			else
+				result =  field.getV().toString();
+
+			//removing the excess byte by the setmaxFiledSize
+			if (maxFieldSize == 0 || maxFieldSize == Integer.MAX_VALUE) {
+				return result;
+			} else {
+				try { //lets try to remove the excess bytes
+					return result.substring(0, maxFieldSize);
+				} catch (IndexOutOfBoundsException iout) {
+					//we don't need to remove any excess byte
+					return result;
+				}
+			}
 		}
 	}
 
@@ -1537,14 +1585,21 @@ public class BQForwardOnlyResultSet implements java.sql.ResultSet
 	@Override
 	public Timestamp getTimestamp(int columnIndex) throws SQLException
 	{
-		Long value = this.getLong(columnIndex);
 		if (this.wasNull())
 		{
 			return null;
 		}
 		else
 		{
-			return new java.sql.Timestamp(value);
+			Object value = this.getObject(columnIndex);
+			if (this.getMetaData().getColumnTypeName(columnIndex).equals("DATE"))
+				return new Timestamp(((Date) value).getTime());
+			else if (this.getMetaData().getColumnTypeName(columnIndex).equals("DATETIME"))
+				return (java.sql.Timestamp)value;
+			else if (this.getMetaData().getColumnTypeName(columnIndex).equals("TIMESTAMP"))
+				return (java.sql.Timestamp)value;
+			else
+				throw new IllegalArgumentException("Unsupported data type");
 		}
 	}
 
@@ -1555,16 +1610,7 @@ public class BQForwardOnlyResultSet implements java.sql.ResultSet
 	public Timestamp getTimestamp(int columnIndex, Calendar cal)
 			  throws SQLException
 	{
-		Long value = this.getLong(columnIndex);
-		if (this.wasNull())
-		{
-			return null;
-		}
-		else
-		{
-			return new java.sql.Timestamp(cal.getTimeZone().getRawOffset()
-					  + value);
-		}
+		return getTimestamp(columnIndex);
 	}
 
 	/**

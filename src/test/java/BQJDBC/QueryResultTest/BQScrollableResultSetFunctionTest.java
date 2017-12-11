@@ -745,4 +745,87 @@ public class BQScrollableResultSetFunctionTest {
         HelperFunctions.printer(queryResult);
     }
 
+
+    @Test
+    public void selectDateDateTimeTimestamp() {
+
+        String input = "SELECT \n" +
+                "CAST(DATE(time_ts) as DATE) as D_FIELD, CAST(DATE(time_ts) as DATETIME) as DT_FIELD, time_ts as TS_FIELD \n" +
+                "FROM [bigquery-public-data:hacker_news.comments]\n" +
+                "where \n" +
+                "time_ts is not null \n" +
+                "and time_ts > cast ('2014-01-01 00:00:00' as TIMESTAMP )\n" +
+                "order by time_ts\n" +
+                "LIMIT 10";
+        logger.info("Running test: selectDateDateTimeTimestamp \r\n" + input );
+
+        ResultSet queryResult = null;
+        try {
+            queryResult = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY).executeQuery(input);
+            Assert.assertEquals("DATE", queryResult.getMetaData().getColumnTypeName(1));
+            Assert.assertEquals("DATETIME", queryResult.getMetaData().getColumnTypeName(2));
+            Assert.assertEquals("TIMESTAMP", queryResult.getMetaData().getColumnTypeName(3));
+
+            queryResult.next();
+
+            Assert.assertEquals("2014-01-01", queryResult.getString(1));
+            Assert.assertEquals("2014-01-01T00:00:00", queryResult.getString(2));
+            Assert.assertEquals("2014-01-01 00:00:05.000+0000", queryResult.getString(3));
+            queryResult.close();
+
+            ((BQConnection)con).setTimeZone("CET");
+            queryResult = con.createStatement().executeQuery(input);
+            queryResult.next();
+
+            Assert.assertEquals("2014-01-01", queryResult.getString(1));
+            Assert.assertEquals("2014-01-01T00:00:00", queryResult.getString(2));
+            Assert.assertEquals("2014-01-01 01:00:05.000+0100", queryResult.getString(3));
+        }
+        catch (SQLException e) {
+            this.logger.error("SQLexception" + e.toString());
+            Assert.fail("SQLException" + e.toString());
+        }
+        Assert.assertNotNull(queryResult);
+    }
+
+    @Test
+    public void selectTimestamp() {
+
+        String input = "SELECT \n" +
+                "CAST(DATE(time_ts) as DATE) as D_FIELD, CAST(DATE(time_ts) as DATETIME) as DT_FIELD, time_ts as TS_FIELD \n" +
+                "FROM [bigquery-public-data:hacker_news.comments]\n" +
+                "where \n" +
+                "time_ts is not null \n" +
+                "and time_ts > cast ('2014-01-01 00:00:00' as TIMESTAMP )\n" +
+                "order by time_ts\n" +
+                "LIMIT 10";
+        logger.info("Running test: selectDateDateTimeTimestamp \r\n" + input );
+
+        ResultSet queryResult = null;
+        try {
+            queryResult = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY).executeQuery(input);
+            queryResult.next();
+
+            Assert.assertEquals(queryResult.getObject(1).getClass(), java.sql.Date.class);
+            Assert.assertEquals(1388512800000L, queryResult.getTimestamp(1).getTime());
+            Assert.assertEquals(queryResult.getObject(2).getClass(), java.sql.Timestamp.class);
+            Assert.assertEquals(1388512800000L, queryResult.getTimestamp(2).getTime());
+            Assert.assertEquals(queryResult.getObject(3).getClass(), java.sql.Timestamp.class);
+            Assert.assertEquals(1388534405000L, queryResult.getTimestamp(3).getTime());
+            queryResult.close();
+
+            ((BQConnection)con).setTimeZone("CET");
+            queryResult = con.createStatement().executeQuery(input);
+            queryResult.next();
+
+            Assert.assertEquals(1388512800000L, queryResult.getTimestamp(1).getTime());
+            Assert.assertEquals(1388512800000L, queryResult.getTimestamp(2).getTime());
+            Assert.assertEquals(1388534405000L, queryResult.getTimestamp(3).getTime());
+        }
+        catch (SQLException e) {
+            this.logger.error("SQLexception" + e.toString());
+            Assert.fail("SQLException" + e.toString());
+        }
+        Assert.assertNotNull(queryResult);
+    }
 }

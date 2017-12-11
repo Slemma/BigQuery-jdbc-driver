@@ -20,10 +20,7 @@
 package com.slemma.jdbc;
 
 import java.math.BigInteger;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Timestamp;
+import java.sql.*;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -120,6 +117,11 @@ public class BQResultSet extends ScrollableResultset<Object> implements
         }
     }
 
+    protected BQConnection getConnection() throws SQLException
+    {
+        return (BQConnection)this.Statementreference.getConnection();
+    }
+
     /** {@inheritDoc} */
     @Override
     public int findColumn(String columnLabel) throws SQLException {
@@ -197,7 +199,8 @@ public class BQResultSet extends ScrollableResultset<Object> implements
                 if (Columntype.equals("INTEGER")) {
                     return Long.parseLong(result);
                 }
-                if (Columntype.equals("TIMESTAMP")) {
+                if (Columntype.equals("TIMESTAMP"))
+                {
                     long val = new BigDecimal(result).longValue() * 1000;
                     return new Timestamp(val);
                 }
@@ -205,8 +208,21 @@ public class BQResultSet extends ScrollableResultset<Object> implements
                 {
                     try
                     {
-                        java.util.Date dt = simpleIso8601Format.parse(result);
-                        return new Timestamp(dt.getTime()).toString();
+                        java.util.Date dt = BQSupportFuncts.DATETIME_Format.parse(result);
+                        return new Timestamp(dt.getTime());
+                    }
+                    catch (ParseException e)
+                    {
+                        logger.error("Couldn't parse datetime", e);
+                        return null;
+                    }
+                }
+                if (Columntype.equals("DATE"))
+                {
+                    try
+                    {
+                        java.util.Date dt = BQSupportFuncts.DATE_Format.parse(result);
+                        return new Date(dt.getTime());
                     }
                     catch (ParseException e)
                     {
@@ -237,13 +253,25 @@ public class BQResultSet extends ScrollableResultset<Object> implements
         if (this.isClosed()) {
             throw new BQSQLException("This Resultset is Closed");
         }
-        String result = (String) ((TableRow) this.RowsofResult[this.Cursor]).getF()
-                .get(columnIndex - 1).getV();
-        if (result == null) {
+
+        TableCell field = ((TableRow) this.RowsofResult[this.Cursor]).getF().get(columnIndex - 1);
+
+        if (Data.isNull(field.getV())) {
             this.wasnull = true;
         } else {
             this.wasnull = false;
         }
+
+        String result;
+        if (this.getMetaData().getColumnTypeName(columnIndex).equals("TIMESTAMP"))
+        {
+            long tsLong = Double.valueOf((String) field.getV()).longValue()*1000;
+            Timestamp ts = new Timestamp(tsLong);
+            result = BQSupportFuncts.timestampToString(ts, this.getConnection().getTimeZone());
+        }
+        else
+            result = field.getV().toString();
+
         //removing the excess byte by the setmaxFiledSize
         if (maxFieldSize == 0 || maxFieldSize == Integer.MAX_VALUE) {
             return result;

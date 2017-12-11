@@ -27,10 +27,13 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.net.URLEncoder;
+import java.sql.Timestamp;
 import java.sql.Types;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.TimeZone;
 
 import com.google.api.services.bigquery.model.*;
 import org.apache.log4j.Logger;
@@ -726,4 +729,18 @@ public class BQSupportFuncts {
             return java.sql.Types.NULL;
         }
     }
+
+    public static final SimpleDateFormat TIMESTAMP_TZ_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSZ");
+
+    public static final String DATETIME_FORMAT_STRING = "yyyy-MM-dd'T'HH:mm:ss";
+    public static final String DATE_FORMAT_STRING = "yyyy-MM-dd";
+    public static final SimpleDateFormat DATETIME_Format = new SimpleDateFormat(DATETIME_FORMAT_STRING);
+    public static final SimpleDateFormat DATE_Format = new SimpleDateFormat(DATE_FORMAT_STRING);
+
+    public static String timestampToString(Timestamp value, String timeZone)
+    {
+        TIMESTAMP_TZ_FORMAT.setTimeZone(TimeZone.getTimeZone(timeZone));
+        return TIMESTAMP_TZ_FORMAT.format(value);
+    }
+
 }
