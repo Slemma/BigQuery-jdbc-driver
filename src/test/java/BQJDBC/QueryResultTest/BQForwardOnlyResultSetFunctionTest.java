@@ -94,48 +94,7 @@ public class BQForwardOnlyResultSetFunctionTest {
         }
         this.logger.info("chainedfunctiontest end");
     }
-    
-    @Test
-    public void databaseMetaDataGetTables()
-    {
-        //clouddb,ARTICLE_LOOKUP,starschema.net,[Ljava.lang.String;@9e8424
-        ResultSet result = null;
-        try {
-            //Function call getColumns 
-            //catalog:null, 
-            //schemaPattern: starschema_net__clouddb, 
-            //tableNamePattern:OUTLET_LOOKUP, columnNamePattern: null
-            //result = con.getMetaData().getTables("OUTLET_LOOKUP", null, "starschema_net__clouddb", null );
-            result = con.getMetaData().getColumns(null, "starschema_net__clouddb", "OUTLET_LOOKUP", null);
-            //Function call getTables(catalog: ARTICLE_COLOR_LOOKUP, schemaPattern: null, tableNamePattern: starschema_net__clouddb, types: TABLE , VIEW , SYSTEM TABLE , SYNONYM , ALIAS , )            
-        }
-        catch (SQLException e) {
-            e.printStackTrace();
-            Assert.fail();
-        }
-        try {
-            Assert.assertTrue(result.first());
-            while(!result.isAfterLast()){
-                String toprint = "";
-                toprint += result.getString(1) + " , ";
-                toprint += result.getString(2) + " , ";
-                toprint += result.getString(3) + " , ";
-                toprint += result.getString(4) + " , ";
-                toprint += result.getString(5) + " , ";
-                toprint += result.getString(6) + " , ";
-                toprint += result.getString(7) + " , ";
-                toprint += result.getString(8) + " , ";
-                toprint += result.getString(9) + " , ";
-                toprint += result.getString(10);
-                System.err.println(toprint);
-                result.next();
-            }
-        }
-        catch (SQLException e) {
-            e.printStackTrace();
-            Assert.fail();
-        }            
-    }
+
         
     /**
      * For testing isValid() , Close() , isClosed()

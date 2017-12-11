@@ -152,20 +152,12 @@ public class BQResultSetFunctionTest {
         }
         this.logger.info("chainedfunctiontest end");
     }
-    
     @Test
     public void databaseMetaDataGetTables()
     {
-        //clouddb,ARTICLE_LOOKUP,starschema.net,[Ljava.lang.String;@9e8424
         ResultSet result = null;
         try {
-            //Function call getColumns 
-            //catalog:null, 
-            //schemaPattern: starschema_net__clouddb, 
-            //tableNamePattern:OUTLET_LOOKUP, columnNamePattern: null
-            //result = con.getMetaData().getTables("OUTLET_LOOKUP", null, "starschema_net__clouddb", null );
-            result = con.getMetaData().getColumns(null, "starschema_net__clouddb", "OUTLET_LOOKUP", null);
-            //Function call getTables(catalog: ARTICLE_COLOR_LOOKUP, schemaPattern: null, tableNamePattern: starschema_net__clouddb, types: TABLE , VIEW , SYSTEM TABLE , SYNONYM , ALIAS , )            
+            result = con.getMetaData().getColumns(null, "samples", "natality", null);
         }
         catch (SQLException e) {
             e.printStackTrace();
@@ -192,7 +184,7 @@ public class BQResultSetFunctionTest {
         catch (SQLException e) {
             e.printStackTrace();
             Assert.fail();
-        }            
+        }
     }
     
     /**
