@@ -73,8 +73,7 @@ class BQResultsetMetaData implements ResultSetMetaData
 	@Override
 	public String getCatalogName(int column) throws SQLException
 	{
-		logger.debug("function call getCatalogName() return is: " +
-				  this.result.getJobReference().getProjectId());
+		logger.debug("function call getCatalogName() return is: " + this.result.getJobReference().getProjectId());
 		return this.result.getJobReference().getProjectId();
 	}
 
